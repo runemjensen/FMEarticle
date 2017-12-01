@@ -1,0 +1,48 @@
+%\input{preamble}
+%\begin{document}
+\section{Definitions and notation}
+\paragraph{(In)equality systems}
+In the following, an (in)equality system $S$ is a set of equalities and inequalities over the same set of variables, $\VAR(S)=\{x_1,\ldots, x_n\}$. 
+Each (in)equality $c$ is written as either $a_1x_1 + \ldots +a_nx_n = b$ or $a'_1x_1 + \ldots +a'_nx_n\leq b'$, though the left-hand-side is also written using a dot-product. 
+%
+We let $\var(c)$ denote the variables whose coefficient in $c$ is nonzero and say that $c$ \emph{uses} $x$ if $x\in \var(c)$.
+
+The set of points in $\mathbb{R}^{|\VAR(S)|}$ that satisfies all (in)equalities in $S$ is called $S$'s \emph{feasible area}.
+%Since the feasible area is just a set of points in a multi-dimensional Euclidian space, the number and the order of the variables are important and needs to be given (explicitly or implicitly). 
+%
+An (in)equality $c\in S$ is \emph{redundant} if it does not influence the feasible area for $S$. In other words the inequality $c: \ve{a}\cdot\ve{x}\leq b$ is redundant iff $\max \ve{a}\cdot\ve{x}$ w.r.t. $S\setminus\{c\}$ is less or equal to $b$.
+An equality is redundant iff both corresponding inequalities are redundant.
+If the (in)equality $c$ is \emph{not} redundant, it is called \emph{non-redundant}.
+
+\paragraph{Projection}
+As described, the feasible area of $S$ describes the combination of values for the variables in $\VAR(S)$ that satisfy all (in)equalities in $S$. However, there are some variables $Y\subseteq \VAR(S)$ whose value in a feasible point we are not interested in; we just want to know that a satisfying value exists. This information is captured by the \emph{projection} of the feasible area of $S$ w.r.t. $Y$, $\mi{proj}_YS\in\mathbb{R}^{|\VAR(S)\setminus Y|}$. This is the largest set consisting of values for $\VAR(S)\setminus Y$ that can be extended with values for $Y$ such that all (in)equalities in $S$ are satisfied (see Figure~\ref{fig:proj}). 
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=0.8]{figures/projection.pdf}
+	\caption{The projection of the $S$ with respect to $\{x_3\}$.}
+	\label{fig:proj}
+\end{figure}
+
+The projection of a system $S$ is a set of points in Euclidian space, and it is the feasible region of (another) inequality system $S'$ (see e.g. \cite{ziegler95}). However, many (in)equality systems determine the same feasible area, and when we say e.g. ``$S'$ is the projection of $S$ w.r.t. $Y$'' we mean that ``$S'$ is one of the (in)equality systems whose feasible area equals the projection of the feasible area of $S$ w.r.t $Y$''.
+
+\paragraph{A note on $\VAR(S)$}
+In this paper, we are mainly interested in the original system $S$ and its projection $S'$, while the associated feasible areas of $S$ and $S'$ are the ``mediator'' between the two systems. 
+However, since the feasible area of a system is just a set of points in a multi-dimensional Euclidian space, the number and the order of the variables are important and needs to be given (explicitly or implicitly). 
+%
+Though, the inequality $c:a_1x_1\leq b$ can be considered both as an inequality over the set $\{x_1\}$ as well as over any set $X$ where $x_1\in X$, and we will not specify $VAR(S')$ formally for every considered (in)equality system $S$.
+Intuitively, we just make sure that the dimensions (and order of variables) ``match''. For example, when two systems $S$ and $S'$ are joined to form another system $S''$, we consider $S$ and $S'$ as (in)equalities over the same variable set, namely the variables used in either $S$ or $S'$, i.e. $VAR(S'')=var(S)\cup var(S')$.
+A more stringent exposition keeping track of the variable sets and ordering can be found in \cite{MyTechRep}.
+%\end{document}
+
+\iffalse
+\paragraph{[Is probably not needed]}
+[We say that two (in)equality systems $S_1$ and $S_2$ are \emph{equivalent} and write $S_1\cong S_2$ if 
+$\VAR(S_1)=\VAR(S_2)$ and $\feas(S_1) = \feas(S_2)$.]
+
+[If $Y_1,\ldots, Y_k$ is a partition of $Y$ then we have that $\proj_Y(P)=\proj_{Y_1}(\proj_{Y_2}(\ldots (\proj_{Y_k}(P))\ldots))$.]
+
+[It follows that if $S_1, S_2\subseteq S$, then $\feas(S_1\cup S_2) = \feas(S_1)\cap \feas(S_2)$.]
+
+[In linear programming, it is common to have bounds for some of the variables in an (in)equality system $S$. For our purpose, upper and lower bounds are modeled as inequalities. ]
+\fi

@@ -1,0 +1,121 @@
+\input{preamble}
+\algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}%
+
+\begin{document}
+\subsection*{Overall procedure}
+Combining all of the above mentioned step, the overall projection procedure can thus be described with the following pseudocode:
+%
+\begin{algorithmic}
+\Function{Project}{$S$,$Y$}
+	\State $(S,Y)\gets \Call{Preprocess}{S,Y}$
+	\State $(S,Y)\gets\Call{Gauss-Elim}{S,Y}$
+	\While{$Y\neq\emptyset$}
+		\State $(S, Y, New )\gets\Call{FME-SingleVar}{S,Y}$
+		\State $S\gets\Call{RemoveRedundancy}{S,New}$
+	\EndWhile
+	\State \Return $S$
+\EndFunction
+\end{algorithmic}
+
+The sub-algorithms used are:
+\begin{algorithmic}
+\Function{Preprocess}{$S, Y$}
+	\Do
+		\State $(S,Y)\gets$ remove unused variables (in $Y$) and and empty (in)equalities
+		\State $(S,Y)\gets$ do FME on variables only occurring with only one sign
+		\State Update bounds for all variables and the left-hand-side of (in)equalities
+		\State $S\gets$ remove syntactically redundant inequalities
+	\doWhile{A variable or (in)equality is removed, a variable is replaced with a value, or a bound is made stricter}
+\State $S \gets$ add inequalities expressing the non-trivial bounds for the variables 
+\State \Return $(S, Y)$
+\EndFunction
+\end{algorithmic}
+
+\begin{algorithmic}
+\Function{Gauss-Elim}{$S$, $Y$}
+\While{$Y$ contains a variable used in an equality in $S$}
+	\State $Y'\gets$ the variables in $Y$ that are used in any equality in $S$
+%	\State \color{red}{or: $Y'\gets \set{x\in Y}{x\in \mi{var}(\{e\})\text{ for any equality } e\in S}$}
+	\State \color{black}{$x\gets$ the variable in $Y'$ used by the fewest (in)equalities in $S$}
+%	\State \color{red}{or: $x\gets$ the variable in $Y'$ that minimizes $|\set{c\in S}{x\in \mi{var}(\{c\})}|$}
+	\State \color{black}{$e\gets$ the equality in $S$ using $x$ that uses the fewest variables} %minimizes $|\mi{var}(\{e\})|$}
+	\State Remove $e$ from $S$ and $x$ from $Y$ %$S\gets S\setminus \{e\}$, $Y\gets Y\setminus\{x\}$
+	\State Isolate $x$ in $e$ and substitute in all (in)equalities in $S$
+\EndWhile
+\State \Return $(S,Y)$
+\EndFunction
+\end{algorithmic}
+
+\begin{algorithmic}
+\Function{FME-SingleVar}{$S,Y$}
+	\State $x\gets$ the variable in $Y$ that minimizes $|\Pos_S(x)\cdot \Neg_S(x) - \Pos_S(x)-\Neg_S(x)|$
+	\State $S'\gets \set{i_{p,n,x}}{p\in \Pos_S(x), n\in  \Neg_S(x)}$
+	\State \Return $(\mi{Zero}_S(x)\cup S', Y\setminus\{x\}, S')$
+\EndFunction
+\end{algorithmic}
+
+\begin{algorithmic}
+\Function{RemoveRedundancy}{$S$, $N$}
+	\State Examine each inequalities in $N$ in parallel:
+	\State $\quad$ $R\gets$ the inequalities that are strictly redundant w.r.t. $S$
+	\State $\quad$ $A\gets$ the inequalities that are almost redundant w.r.t. $S$
+	\State $S\gets S\setminus R$
+	\State Examine all inequality in $A$, sequentially:
+	\State $\quad$ $A'\gets$ the inequalities that are almost redundant w.r.t. $S$
+\EndFunction
+\State \Return $S\setminus (R\cup A')$
+\end{algorithmic}	
+
+Nåh ja, og så er der lige list ``clean-up'' ind imellem. Tror ikke, jeg har brug for at beskrive det med $\kappa-values$, da det ikke er aktuelt i de konkrete projektioner...(?)
+\\\\
+Each time we further decompose a system, we use a partitioning of the subsystems $S^l_1, \ldots, S^l_{k_l}$ to create $k_{l+1}$ new subsystems $S^{l+1}_1,\ldots, S^{l+1}_{k_{l+1}}$. This creates a new ``level'' of subsystems and results in a tree structure of smaller inequality systems, where each node is associated with a subsystem and a set of variables that should be eliminated from the system. \red{The leafs are associated with the systems $S^0_1,\ldots, S^0_k$ and the variable sets $Y\cap \mi{VAR}(S_1),\ldots, Y\cap \mi{VAR}(S_k)$, respectively, while the root is associated with the the pair $(S^K_\trt{g}, \set{z^K_{c,j}}{(c,j)\in S_\trt{g}\times\{1,\ldots,k_K\}}\cup Y')$ for some $K$, where $Y'=Y\setminus \mi{VAR}(S_1)\cup\ldots \cup \mi{VAR}(S_k)$.  
+For $0<l\leq K$, a node $n$ associated with the system $S^l_i=\set{\mi{Def}(z^l_{c,i})}{c\in S_\trt{g}}$
+is associated with the variable set 
+$\set{z^{l-1}_{c,j}}{(c,j)\in S_\trt{g}\times \{1,\ldots, k_{l-1}\}}\cap \VAR(S^l_i)$.}
+
+To project $S$ w.r.t. $Y$ we therefore create the tree $T$ as decribed above \red{and ... recursively..}
+That is, we call \Call{ProjectNode}{root of $T$}, where
+
+\begin{algorithmic}
+\Function{ProjectNode}{Node $n$} 
+	\State $(S,Y)\gets$ the system and variable set associated with $n$
+	\If{$n$ is a leaf}
+		\State \Return \Call{FM-ProjectionFramework}{$S$, $Y$}
+	\Else
+		\ForAll{children $m$ of $n$}
+			\State $S \gets S\cup \Call{ProjectNode}{m}$
+		\EndFor
+		\State \Return $\Call{FM-ProjectionFramework}{S, Y}$
+	\EndIf
+\EndFunction
+\end{algorithmic}
+
+Parallelization
+\begin{algorithmic}
+\Function{Manager}{$T$ tree structure of $S$}
+	\State Initialize the count of all nodes to $0$ and all projections to $\emptyset$
+	\State Create $w$ workers, initially idle
+	\State Initialize a queue $Q$ with all leaves in $T$
+	\While{the projection of $T$ equals $\emptyset$}
+		\If{$Q$ is non-empty}
+			\State As soon as a worker $w$ is idle
+			\State Remove first node $n$ from $Q$
+			\State Give $w$ $n$ as input
+		\EndIf
+	\EndWhile
+\EndFunction
+\State \Return the projection of the root of $T$
+\Statex
+\Function{Worker}{node $n$}
+\State the projection of $n\gets$ \Call{Project}{System $S$ of $n$, elimination variables of $n$}
+\State $p\gets$ parent of $n$
+\State Increase count of $p$
+\If{the count of $p$ equals the number of $p$'s children}
+	\State add p to $Q$
+\EndIf
+\State \Return to idle state
+\EndFunction
+\end{algorithmic}	
+ 
+
+\end{document}

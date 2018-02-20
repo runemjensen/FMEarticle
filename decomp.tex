@@ -1,5 +1,5 @@
-\input{preamble}
-\begin{document}
+%\input{preamble}
+%\begin{document}
 \section{Decomposing system}
 In the following we will describe how the structure of the problem can be exploited to make our projection framework perform better on large systems. Detailed pseudocode and proofs can be found in \cite{MyTechRep}. 
 
@@ -136,4 +136,4 @@ The pseudocode for this is presented below. Besides a system $S$ and a variable 
 \end{algorithmic}	
 All workers project a system using the FM-based projection framework, which again involves parallel redundancy removal, and thus it is important to only use as many resources (threads) in total as there are available.
 Then, when at some point there are less nodes left to project than there are workers in $W$, the superfluous workers can pass on their resources to the remaining workers.  
-\end{document}
+%\end{document}

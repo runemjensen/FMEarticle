@@ -1,6 +1,6 @@
-%\input{preamble}
+\input{preamble}
 
-%\begin{document}
+\begin{document}
 \section{Standard Vessel Model}
 \red{In this section we will describe the data usually given/necessary for a stowage model, and we will explain how this data/information is translated into our proposed \emph{Standard Vessel Model} (SVM). The main purpose of the SVM is to abstracts away much of the unnecessary complexity relating to the physical layout/shape of the vessel, as well as ``bundle together'' ... / while another objective is to summarize ... .} 
 %The reason for this ``translation'' is that different constraints are given w.r.t. different sets of points along the vessel; capacity constrains relates to one set of points along the vessel, while other hydrostatic constraints are given with respect to another set of points
@@ -19,7 +19,7 @@ To describe a vessel and the possible cargo, the vessel data therefore use the s
 
 \begin{figure}
 	\centering
-		\includegraphics{vessel.pdf}
+		\includegraphics{figures/vessel.pdf}
 	\caption{A vessel with structures [More reefer plugs]}
 	\label{fig:vessel}
 \end{figure}
@@ -72,4 +72,4 @@ we linearize the upper (lower) bound for the shear force between two consecutive
 
 Hydrostatic constraints are then added to our model to ensure that the shear force and bending moment at each section's aft endpoint is within the calculated upper and lower bounds.
 
-%\end{document}
+\end{document}

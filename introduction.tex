@@ -1,34 +1,62 @@
-%\input{preamble}
+\input{preamble}
 
-%\begin{document}
+\begin{document}
 \section{Introduction}
+\paragraph{Liner shipping}
+Container shipping is a central element in the clockwork of global trade. In fact, it is believed to be more important for globalization than freer markets \cite{EC13}. A container liner shipping company operates a set of container vessels which sail on closed loop services with fixed schedules. These services connect major trade regions like Asia and Europe, and the liner shipping business is focused on utilizing the cargo capacity in their service network. Unused capacity constitute a loss and the competition is fierce with a profit margin of just a few percent.  
 
-Container shipping is a central element in the clockwork of global trade. In fact, it is believed to be more important for globalization than freer markets \cite{EC13}. A container liner shipping company operates a set of container vessels. The vessels sail on closed loop services with fixed  schedules that connect major trade regions like Asia and Europe. Liner shipping business is focused on utilizing the cargo capacity in the service network. Unused capacity is loss and the competition is fierce with a profit margin of just a few percent.  
+To avoid unused capacity, it is central for a liner shipping company to be able to estimate the residual capacity of a container vessel. This is much harder than in the airline industry, where the number of empty seats in an airplane usually equals its free passenger capacity. For a container vessel, however, it can be hard to determine whether an empty container slot can be filled.  
+For example, the weight capacity of the container stack of the slot or the stack's lashing gear may be exhausted. 
+Similarly, placing a container in the slot may break stress limits such as torsion moment and shear forces or cause the vessel to become unstable.
+Further, placing a container in the slot on top of containers that must be discharged in the next port of call may obstruct the discharge of these or assign too many moves to the crane working on the stack in the port of discharge. 
+%
+Additionally, it may be impossible to place a specific \emph{type} of container in a slot. This may be due to rules regarding separation of dangerous goods, or because of stacking rules that e.g. disallow 20' long containers to be stacked on top of 40' long containers. 
 
-For that reason, it is central for a liner shipping company to be able to estimate the residual capacity of a container vessel. This is much harder than in the airline industry, where the number of empty seats in an airplane usually equals its free passenger capacity. For a container vessel, on the other hand, it can be hard to determine whether an empty container slot can be filled. The weight capacity of the container stack of the slot or its lashing gear may be exhausted. It may be impossible to place the type of container we want in the slot due stacking rules such as no 20' long on top of 40' long containers and dangerous goods separation rules. Placing a container may break stress limits such as torsion moment and shear forces or cause the vessel to become unstable. The container we want to place may also block for containers below it in the stack that must be discharged in next port of call or it may cause the crane assigned to the stack in that port to have too many moves to carry out. 
+Often it is only the stowage planning experts of a service that can determine the free capacity of a vessel accurately, and even they may sometimes have to manually construct a stowage condition of the vessel to be able to express the residual capacity in terms of a trade-off between the different container types to load.
 
-Often it is only the stowage planning experts of a service that can determine the free capacity of a vessel accurately and even they may sometimes have to manually construct a stowage condition of the vessel to express this capacity in terms of a trade-off between the different container types to load.
+\paragraph{Usage of capacity models}
+Accurate capacity estimates are, however, not only important in stowage 
+for securing good utilization of the vessels,
+it is also important for many other functions in a liner shipping company. These include: {\em uptake management} that control the sale of cargo bookings such as to fill the vessels with profitable cargo; {\em capacity management} that route cargo through the service network; {\em network management} that makes changes to the service network; and {\em fleet management} that charters and buys vessels for the service network and reposition vessels between closing and opening services.  
 
-Many other functions in a liner shipping company, however, depend on accurate capacity estimates. These include: {\em uptake management} that control the sale of cargo bookings to fill the vessels with profitable cargo; {\em capacity management} that route cargo through the service network; {\em network management} that makes changes to the service network; and {\em fleet management} that charters and buys vessels for the service network and reposition vessels between closing and opening services.  
+Decision makers in these functions seldom have deep stowage insight and traditionally regard vessel capacity in terms of maximum volume, maximum weight, and maximum number of reefer containers (refrigerated containers). In order to determine vessel capacity accurately they need to consult the stowage team, and since this is resource and time consuming, they often act on insufficient information leading to sub-optimal decisions in these high functions.  
 
-Decision makers in these functions seldom have deep stowage insight and traditionally regard vessel capacity in terms of maximum volume, maximum weight, and maximum number of reefer containers (refrigerated containers). They need to consult the stowage team to determine vessel capacity accurately. Since this is resource and time consuming, they often act on insufficient information leading to sub-optimal decisions in these high functions.  
+\paragraph{Stowage models as capacity models}
+Previous work on stowage planning optimization (e.g., \cite{roach00}, \cite{kimkang02}, \cite{ambrosino04}, \red{low,} \cite{delgado09}, \cite{pacino12}) has contributed frameworks for automated stowage planning, 
+%shouldn't it be mentioned that is is within linear programming?
+and recently, mixed integer programming (MIP) stowage planning models were shown to scale to large container vessels (\cite{pacino11} \red{, mm}). Since these models define the set of legal stowage conditions, they can be used to compute the residual capacity of a container vessel as a result of the interaction between the different types of containers to load. In other words, they embed an accurate capacity model. 
 
-Previous work on stowage planning optimization (e.g., roach, kim kang, ambrosino, low, CP alberto, pacino) has contributed frameworks for automated stowage planning. Recently, mixed integer programming (MIP) stowage planning models were shown to scale to large container vessels (cite pacino 11, mm). Since these models define the set of legal stowage conditions, they can be used to compute the residual capacity of a container vessel in terms of the trade-off between the different container types to load. In other words, they embed an accurate capacity model. 
+However, the use of these stowage models as capacity models is limited due to their size. Since a stowage model not only models the capacity of a vessel as a function of the different container types to load but also describes the position of the containers on the vessel, it may contain thousands of constraints and variables and take long time to solve. This is a problem if the stowage model is to be used as a capacity model %. The reason is that 
+since optimization in uptake-, capacity-, fleet-, and network management often requires several hundred capacity models to be solved simultaneously. For example, the task in uptake management of maximizing uptake over a set of voyages, requires us to associate a capacity model with each individual leg of the voyages and optimize the resulting model.  
 
-A limitation of using these stowage models as capacity models is their size. A stowage model not only models the capacity of a vessel as a function of container types to load, but also determines the position of the containers on the vessel. Consequently, a stowage model may contain thousands of constraints and variables and take long time to solve. This is a problem if the stowage model is to be used as a capacity model. The reason is that optimization in uptake, capacity, fleet, and network management often requires several hundred capacity models to be solved simultaneously. Take uptake management as an example. In order to maximize uptake over a set of voyages, we need to associate a capacity model with each sailing leg of the voyages and optimize the resulting model.  
+\paragraph{Our contribution}
+%What we do
+In this article, we reduce the size of the stowage models contributed by previous research by removing the container position information from these models. Inspired from previous work in constraint programming (\cite{lassez90}) and software verification (\cite{benoy05}), we do this by projecting container position variables out of these stowage models using a framework based on Fourier-Motzkin Elimination (FME). 
+%
+After projecting all position variables, the resulting model only depends on variables denoting the total amount of each type of containers that can be loaded - i.e., it is a capacity model. 
+%
+The derived capacity models are valid in the sense that each feasible solution in the capacity model is associated with a feasible solution in the stowage model it is derived from, even though the capacity model has no information about the place at which the containers are stowed. 
 
-In this article, we reduce the size of the stowage models contributed by previous research by removing the container position information from these models. Inspired from previous work in constraint programming (cite) and software verification (cite), we project container position variables out of these stowage models using Fourier-Motzkin Elimination (FME). 
+Our main contribution is a novel decomposed FME framework that takes advantage of the block-angular structure of stowage models to significantly speed-up the projection of variables in these models. 
+%\red{Without decomposition, for bigger models the projection process times out after xx hours having only projected a fraction of the variables.}
 
-Our main contribution is a novel decomposed FME framework that takes advantage of the block-angular structure of stowage models to speed-up the projection of variables. After projecting all position variables, the resulting model only depends on variables expressing the total amount of containers in terms of the different container types that can be loaded - i.e., it is a capacity model. 
+%From technical report: In this report, we introduce a novel hierarchically decomposed and parallelized FME algorithm for massive variable elimination. Similar to other recent FME frameworks (e.g., \cite{simon05,lukatskii08,shapot12}), our method applies Gauss\--elimination (equality removal), removal of syntactic and quasi-syntactic redundancies, complete removal of redundancy in between variable eliminations, together with an approximation of the projection when needed. In addition, our framework includes preprocessing with removal of less strict inequalities. Our main contribution is a hierarchical decomposition of the problem using auxiliary variables based on the block structure that often is observed in LPs \cite{williams} as well as a sound, concurrent implementation of the redundancy removal. 
 
-The derived capacity models are valid in the sense that each feasible solution in the capacity model is associated with a feasible solution in the stowage model, it is derived from, even though the capacity model has no information about, where the containers are stowed on the vessel. 
+\paragraph{Results}
+%
+%\red{Our framework additionally features a parallelized, complete removal of redundant constraints after each variable elimination and a method for coarsening the boundary of the projection.} 
+Though the number of new constraints produced by FME can increase quadratically for each variable projected, leading to a theoretical double exponential complexity in the number of variables to project, %, while the number of binding constraints at most grows single exponentially (\cite{monniaux10}).
+our experimental evaluation of FME on stowage models shows that almost all produced constraints are redundant {or negligible}.
 
-The number of new constraints produced by FME can increase quadratically       for each variable projected. This leads to a theoretical double exponential complexity of FME in the number of variables to project. Our experimental evaluation of FME on stowage models shows that almost all produced constraints are redundant and that the number of binding constraints decreases with the number of variables projected. 
+The results likewise show that the number of constraints and non-zeros in capacity models typically are reduced by an order of magnitude compared to their corresponding stowage models. 
+It can take several hours of CPU time to derive a capacity model, but this only has to be done one time. Moreover, in our experiments, the resulting model can be solved 20-130 times faster than their stowage models with only a negligible loss in accuracy. In this way, FME performs an off-line computation that factors out time when applying the capacity models as sub-models for uptake-, capacity-, fleet-, and network optimization.
 
-Our results show that the number of constraints and non-zeros in capacity models typically are reduced by an order of magnitude compared to their stowage models. It can take several hours of CPU time to derive a capacity model, but this only has to be done one time. Moreover, in our experiments, the resulting model can be solved 20-130 times faster than their stowage models without sacrificing accuracy. In this way, FME performs an off-line computation that factors out time when applying the capacity models as sub-models for uptake, capacity, fleet, and network optimization.
+Since the block-angular structure is frequent in LP models, our decomposed FME framework applies to other problems as well. To that end, as an example we have examined a multi-commodity problem and found a speed-up of the projection process similar to the one seen for capacity models.
 
-Since the block-angular structure is frequent in LP models, our decomposed FME framework applies to other problems as well. To that end, we have examined multi-commodity problems and found speed-ups of the projection process similar to the one seen for capacity models.
+\paragraph{Structure of article}
+This article is organized as follows. First we introduce the required definitions and notation. This is followed by a section outlining the methods used in our FME framework. Subsequently we detail how block-angular problems are decomposed, after which we present the vessel models (stowage models) that are projected. Finally follows our experimental results before we conclude.
 
-This article is organized as follows ...
+\bibliography{bibfile}{}
+\bibliographystyle{alpha}
 
-%\end{document}
+\end{document}

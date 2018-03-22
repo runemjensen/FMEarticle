@@ -1,5 +1,5 @@
-\input{preamble}
-\begin{document}
+%\input{preamble}
+%\begin{document}
 \section{Decomposing block-angular structured system}
 In the following we will describe how the structure of the considered problem can be exploited to make our projection framework perform better on large systems. Detailed pseudocode and proofs can be found in \cite{MyTechRep}. 
 
@@ -13,7 +13,7 @@ However, we can still exploit the structure of the problem. We will define and u
 \paragraph{Using auxiliary variables to separate blocks}  
 To separate and remove local variables from the global constraints, we do as follows for all subsystems $S_i$:
 \begin{itemize}\itemsep0em
-\item For each global constraint $c$ using variables in $S_i$, we define an auxiliary variable $z^0_{c,i}$ that equals the variables in $S_i$'s contribution to $c$. We add the equality defining $z^0_{c,i}$ to $S_i$, and we substitute with $z^0_{c,i}$ in $c$. For example, if $c: a_1x_1 + a_2x_2 + a_3x_3 + \ldots + a_kx_k \leq b$ is an inequality in $S_\trt{g}$ and $X_i = \{x_1,x_2\}$, then we add $-z^0_{c,i} + a_1x_1 + a_2x_2 = 0$ to $S_i$ and rephrase $c$ as $z^0_{c,i} + a_2x_3 + \ldots + a_kx_k \leq b$. 
+\item For each global constraint $c$ using variables in $S_i$, we define an auxiliary variable $z^0_{c,i}$ that equals the variables in $S_i$'s contribution to $c$. We add the equality defining $z^0_{c,i}$ to $S_i$, and we substitute with $z^0_{c,i}$ in $c$. For example, if $c: a_1x_1 + a_2x_2 + a_3x_3 + \ldots + a_kx_k \leq b$ is an inequality in $S_\trt{g}$ and $X_i = \{x_1,x_2\}$, then we add $-z^0_{c,i} + a_1x_1 + a_2x_2 = 0$ to $S_i$ and rephrase $c$ as $z^0_{c,i} + a_3x_3 + \ldots + a_kx_k \leq b$. 
 
 We name the thusly produced subsystem $S_i^0$. 
 \item Then we project $S_i^0$ w.r.t. all variables from $Y$ that are present in $S_i^0$. We do keep the auxiliary $z^0$-variables. 
@@ -58,7 +58,7 @@ the projection of $\mathcal{S}$ w.r.t. $Z^0 \cup Y\setminus (X_1\cup \ldots \cup
 
 \paragraph{Further decomposition}
 $\mathcal{S}$ has by construction a block-angular structure, and instead of eliminating $Z^0\cup Y\setminus(X_1\cup\ldots\cup X_k)$ immediately, if necessary, we can use further auxiliary variables to postpone ``mixing'' blocks when eliminating the remaining variables. 
-To do so, we collect all subsystems into $k_1$ small groups; we have mostly used groups of size 2, 3 or 1\footnote{``Combining'' a single sybsystem corresponds to substituting a variable with a new variable, but can be done for convenience of notation}.
+To do so, we collect all subsystems into $k_1$ small groups; we have mostly used groups of size 2, 3 or 1\footnote{``Combining'' a single sybsystem corresponds to substituting a variable with a new variable, but can be done for convenience of notation.}.
 For each group $i$ we do as follows:
 \begin{itemize}\itemsep0em
 \item We join the systems in the group into a new system, $S^1_i$. For each (rephrased) global inequality $c$ using variables occurring in $S^1_i$, we then define a variable, $z^1_{c,i}$, that equals $S^1_i$'s contribution to $c$. We then add the defining equality to $S^1_i$ and rephrase $c$ using $z^1_{c,i}$.
@@ -91,7 +91,7 @@ That is, we construct systems $S^1_1=\{-z^1_{e,1} + z^0_{e,1}+z^0_{e,2} = 0\}\cu
 The projection of $S$ w.r.t. $Y$ is now made by projecting the root of the tree recursively as shown in Figure~\ref{fig:decomp2}(b). 
 \\
 \\
-Using our previously described projection framework, we obtain the projection of $S$ w.r.t. $Y$ by calling \Call{ProjectNode}{root of $T$}, where $T$ is the tree structure constructed from $S$ and $Y$, and \Call{ProjectNode}{} is as below in Algorithm~\ref{alg:decomp}. We note that due to the boundary coarsening this only approximates $\mi{proj}_Y(S)$.
+Using our previously described projection method, we obtain the projection of $S$ w.r.t. $Y$ by calling \Call{ProjectNode}{root of $T$}, where $T$ is the tree structure constructed from $S$ and $Y$, and \Call{ProjectNode}{} is as below in Algorithm~\ref{alg:decomp}. We note that due to the boundary coarsening this only approximates $\mi{proj}_Y(S)$.
 
 \begin{algorithm}
 \caption{{Using the FME framework on a decomposed, block-angular structured system.}}
@@ -100,12 +100,12 @@ Using our previously described projection framework, we obtain the projection of
 \Function{ProjectNode}{Node $n$} 
 	\State $(S,Y)\gets$ the system and variable set associated with $n$
 	\If{$n$ is a leaf}
-		\State \Return \Call{FME-Framework}{$S$, $Y$}
+		\State \Return \Call{Project}{$S$, $Y$}\Comment Algorithm~\ref{alg:FMEF}
 	\Else
 		\ForAll{children $m$ of $n$}
-			\State $S \gets S\cup \Call{ProjectNode}{m}$
+			\State $S \gets S\cup \Call{ProjectNode}{m}$ 
 		\EndFor
-		\State \Return $\Call{FME-Framework}{S, Y}$
+		\State \Return $\Call{Project}{S, Y}$ \Comment Algorithm~\ref{alg:FMEF}
 	\EndIf
 \EndFunction
 \end{algorithmic}
@@ -138,7 +138,7 @@ The pseudocode for this is presented below. Besides a system $S$ and a variable 
 \Function{ProjectSingleNode}{Node $n$}
 	\State $(S',Y')\gets$ the system and the variable set associated with $n$
 	\State $S'\gets S'\cup_{m\in \mi{children}(n)} m_{proj}$ 
-	\State $n_{proj}\gets$ \Call{FME-Framework}{$S'$,$Y'$}
+	\State $n_{proj}\gets$ \Call{Project}{$S'$,$Y'$} \Comment Algorithm~\ref{alg:FMEF}
 	\State Increase $\mi{parent}(n)_{count}$ by one
 	\If{$\mi{parent}(n)_{count} = |\mi{children}(\mi{parent}(n))|$}
 		\State Add $\mi{parent}(n)$ to $Q$
@@ -149,4 +149,4 @@ The pseudocode for this is presented below. Besides a system $S$ and a variable 
 \vspace{1mm}
 All workers project a system using the FME framework, which again involves parallel redundancy removal, and thus it is important to only use as many resources (threads) in total as there are available.
 Then, when at some point there are less nodes left to project than there are workers in $W$, the superfluous workers can pass on their resources to the remaining workers.  
-\end{document}
+%\end{document}

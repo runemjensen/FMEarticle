@@ -2,21 +2,21 @@
 \newcounter{counterName}
 %\begin{document}
 \section{Method}
-We have developed a framework based on Fourier-Motzkin-elimination for calculating the projection of the constraint system $S$ w.r.t. $Y$. %/for eliminating the variables $Y4 from the constraint system $S$. 
-This framework consists of several sub-procedures which will be described further below in this section. How this framework is used on decomposed, block-angular structured problem will be described in the following section.
+We have developed a framework based on Fourier-Motzkin-elimination for calculating the projection of the constraint system $S$ w.r.t. $Y$, and it %/for eliminating the variables $Y4 from the constraint system $S$. 
+consists of several sub-procedures. The methods for projecting any (not necessarily structured) constraint system are described further below in this section, while the decomposition using on block-angular structured problems will be described in the section following this..
 
 \subsection{Overall procedure}
 Overall, we begin by preprocessing the constraint system, i.e. we reduce it by removing easily identifiable redundant constraints and assign necessary bounds and values to variables.
 Then we use the equalities in the reduced system to isolate variables from $Y$ and substitute in the rest of the system. This clearly eliminates variables from the system, and we refer to it as \emph{Gauss-elimination}.  
 Subsequently, we successively eliminate one variable from $Y$ using Fourier-Motzkin elimination and remove redundant inequalities from the system afterward, until no more variables remain to be eliminated. Eliminating a variable from the system causes some of its constraints to be removed while others new inequalities are added. All of the {staying} constraints are non-redundant, and hence we only check the added inequalities for redundancy. 
 
-At the top-level, the pseudocode for our projection framework is thus as described in the pseudocode below in Algorithm~\ref{alg:FMEF}. 
+At the top-level, the pseudocode for our projection method is thus as described in the pseudocode below in Algorithm~\ref{alg:FMEF}. 
 
 \begin{algorithm}
-\caption{The projection framework based on Fourier-Motzkin elimination} 
+\caption{The projection method based on Fourier-Motzkin elimination} 
 \label{alg:FMEF}
 \begin{algorithmic}
-\Function{FME-Framework}{$S$,$Y$}
+\Function{Project}{System $S$, Variables $Y$}
 	\State $(S,Y)\gets \Call{Preprocess}{S,Y}$
 	\State $(S,Y)\gets\Call{Gauss-Elim}{S,Y}$
 	\While{$Y\neq\emptyset$}
@@ -37,7 +37,7 @@ Fourier-Motzkin elimination (FME) is a classical algorithm for producing the pro
 The method successively eliminates one variable $x\in Y$ until all required variables have been eliminated.  
 %(see e.g. \cite{imbert93} or \cite{ziegler95}).
 
-To eliminate a single variable $x\in Y$ from the constraint system $S$, the constraint are first divided into sets, $\Pos_S(x)$, $\Neg_S(x)$ and $\mi{Zero}_S(x)$ depending on the sign of $x$'s coefficient. Since the method traditionally works on systems without equalities, each equality $e: \ve{a}\cdot\ve{x} = b$ is here treated as two inequalities $\ve{a}\cdot\ve{x} \leq b$ and $-\ve{a}\cdot\ve{x} \leq -b$. Bounds are treated as any other inequalities, so if $ub_x$ is an upper bound for $x$, then $x\leq ub_x$ is added to $\Pos_S(x)$, and if $lb_x$ is a lower bound for $x$, then $-x\leq - lb_x$ is added to $\Neg_x(S)$.
+To eliminate a single variable $x\in Y$ from the constraint system $S$, the constraints are first divided into sets, $\Pos_S(x)$, $\Neg_S(x)$ and $\mi{Zero}_S(x)$ depending on the sign of $x$'s coefficient. Since the method traditionally works on systems without equalities, each equality $e: \ve{a}\cdot\ve{x} = b$ is here treated as two inequalities $\ve{a}\cdot\ve{x} \leq b$ and $-\ve{a}\cdot\ve{x} \leq -b$. Bounds are treated as any other inequalities, so if $ub_x$ is an upper bound for $x$, then $x\leq ub_x$ is added to $\Pos_S(x)$, and if $lb_x$ is a lower bound for $x$, then $-x\leq - lb_x$ is added to $\Neg_x(S)$.
 
 A new system $S'$ is then created, which consists of $\mi{Zero}_S(x)$, together with one inequality, $i_{p,n,x}$, for each pair $(p,n)\in \Pos_S(x)\times \Neg_S(x)$. $i_{p,n,x}$ is the addition of positive multiples pf $p$ and $n$ such that the coefficient of $x$ in the resulting inequality is $0$, i.e., if $p$ equals $\ve{a}\cdot\ve{x} \leq b$ and $n$ equals $\ve{a}'\cdot\ve{x} \leq b'$, then $i_{p,n,x}$ is the inequality 
 \[
@@ -46,10 +46,10 @@ i_{p,n,x}: -a'_x\cdot \ve{a}\cdot\ve{x} + a_x\cdot \ve{a}'\cdot\ve{x} \leq -a'_x
 By construction, the coefficient for $x$ in $i_{p,n,x}$ is zero, and the resulting system $S' = \mi{Zero}_S(x) \cup\\
 \set{i_{p,n,x}}{(p,n)\in \Pos_S(x)\times Neg_S(x)}$ is the projection of $S$ w.r.t. $\{x\}$ (see \cite{MyTechRep}). %Clearly, $S'$ does not depend on $x$ since no constraint in $S'$ uses $x$.
 
-The order in which variables are eliminated naturally influences the size of the intermediary inequality systems. We have chosen to use the greedy heuristic that minimized the size of the immediately next system \cite{duffin74}, which is the most commonly used heuristic. It is easily calculated from the current system as the variable $x\in Y$ that minimized $|\Pos_S(x)||\Neg_S(x)| - |\Pos_S(x)|-|\Neg_S(x)|$. 
+The order in which variables are eliminated naturally influences the size of the intermediary inequality systems. We have chosen to use the greedy heuristic that minimizes the size of the immediately next system \cite{duffin74}, which is the most commonly used heuristic. It is easily calculated from the current system as the variable $x\in Y$ that minimized $|\Pos_S(x)||\Neg_S(x)| - |\Pos_S(x)|-|\Neg_S(x)|$. 
 
 
-It is apparent that in the worst case scenario where $|\Pos_S(x)| = |\Neg_S(x)| = \frac{|S|}{2}$ for all $x\in Y$, the number of inequalities in the created system $S'$ is $\frac{1}{4}|S|^2$, which implies that (both time and space) complexity is double-exponential. For a large, dense system, the growth will be substantial, which prohibits it from use for practical purposes \emph{if} the added inequalities are non-redundant or the non-redundant inequalities are not removed ({See e.g. \cite{lassez93} and \cite{lukatskii08}}). It should, however, also be emphasized that not all inequalities in the succeeding system are necessarily non-redundant; in fact, the number of non-redundant inequalities will at most grow exponentially \cite{monniaux10}.
+It is apparent that in the worst case scenario where $|\Pos_S(x)| = |\Neg_S(x)| = \frac{|S|}{2}$ for all $x\in Y$, the number of inequalities in the created system $S'$ is $\frac{1}{4}|S|^2$, which implies that (both time and space) complexity is double-exponential. For a large, dense system, the growth will be substantial, which prohibits it from use for practical purposes \emph{if} the added inequalities are non-redundant or the non-redundant inequalities are not removed ({see e.g. \cite{lassez93} and \cite{lukatskii08}}). It should, however, also be emphasized that not all inequalities in the succeeding system are necessarily non-redundant; in fact, the number of non-redundant inequalities will at most grow exponentially \cite{monniaux10}.
 
 \paragraph{Gauss-elimination}
 Equalities in a constraint system can be treated as two inequalities when doing FME as described above. However, an equality $e$ can also be used to isolate a variable $x\in Y$ which can then be substituted in all other constraints in $S$; in this paper, this is referred to as Gauss-elimination of the variable $x$ using $e$. This also eliminates $x$ from the system and does not cause the same combinatorial explosion of inequalities as FME may do. 
@@ -64,7 +64,7 @@ Gauss-elimination prior to FME is also done e.g. in \cite{simon05}.
 \subsection{Redundancy removal}
 \paragraph{Using optimization software}
 %As mentioned, an inequality in $S$ is redundant iff its left-hand-side can never exceed its right-hand-side when the values are restricted by all the other constraints of $S$. 
-To detect redundancy examine each inequality $c: \ve{a}\cdot \ve{x}\leq b$ in turn and remove it from the system if $\max \ve{a}\cdot \ve{x}$ subject to $S\setminus\{c\}$ is less than or equal to $b$. The property is checked using the optimization software \texttt{cplex}. Though equalities could be examined this way too, we only examines and remove \underline{in}equalities, since we want to keep the equalities for use in Gauss-elimination.
+To detect redundancy, we examine each inequality $c: \ve{a}\cdot \ve{x}\leq b$ in turn and remove it from the system if $\max \ve{a}\cdot \ve{x}$ subject to $S\setminus\{c\}$ is less than or equal to $b$. The property is checked using the optimization software \texttt{cplex}. Though equalities could be examined this way too, we only examines and remove \underline{in}equalities, since we want to keep the equalities for use in Gauss-elimination.
 
 Not all inequalities have to be examined, though. When removing redundancy from $S' = \mi{proj}_{\{x\}}S$ we do not need to check inequalities in $\mi{Zero}_S(x)$; if they were non-redundant before the elimination, they will be non-redundant after.
 
@@ -82,7 +82,7 @@ For the method to work correctly, it is important that $S$ contains no two const
 \paragraph{Coarsening boundary} 
 Several of the constants in the data used for our vessel models are results of various approximations and hence the boundary of the feasible area is not exact. Coarsening the boundary is therefore permissible, and hence we will also remove inequalities that are \emph{``almost redundant''}. An inequality $c: \ve{a}\cdot\ve{x}\leq b$ is almost redundant if $\max \ve{a}\cdot\ve{x}$  subject to $S\setminus\{c\}$ is less or equal to $b + \epsilon\cdot |b|$ for a small $\epsilon$, see Figure~\ref{fig:almostRedundant}; for our we have used $\epsilon = 0.02$. If $b=0$, we instead require the maximum to be smaller than a given $\epsilon'$. 
 
-\begin{figure}
+\begin{figure}[htbp]
 	\centering
 		\includegraphics[scale=0.9]{figures/almostRedundant.pdf}
 	\caption{The inequality $c$ is almost redundant compared to $c'$, and vice versa.}
@@ -96,7 +96,7 @@ Almost redundant inequalities can \emph{not} be removed in parallel. Otherwise, 
 A method for coarsening the boundary of the feasible area that relies on removing almost redundant inequalities are used in \cite{lukatskii08} and \cite{shapot12} too, though the approach is different.
 
 \subsection{Preprocessing}
-Prior to projecting the system we perform some simple preprocessing steps in order to have a smaller system as the starting point. The steps (which can be found in e.g. \cite{brearley75}, \cite{andersen95} and \cite{maros})
+Prior to projecting the system we perform some simple preprocessing steps in order to have a smaller system as the starting point. The steps (which can be found in e.g. \cite{brearley75,andersen95,maros})
 are then applied repeatedly in a cycle, as long as ``something happens'' in a cycle, that is, a constraint or variable in $Y$ is removed, a variable is substituted with a value, or a bound of a variable or an (in)equality's left-hand-side is updated.
 %When doing this, variables in $\VAR(S)\setminus Y$ are not removed, and we keep track of any values that they are substituted with. 
 
@@ -112,10 +112,10 @@ For each variable $x$, we maintain an upper and lower bound, $ub_x$ and $lb_x$, 
 	\item If $ub_x = lb_x$ for a variable $x\in X$, then substitute $x$ with $lb_x$ in all constraints in $S$. 
 	\item If an inequality $a_x\cdot x \leq b$ belongs to $S$, then remove it from $S$. If $a_x>0$ then update the upper bound for $x$ to $\min\{ub_x,\frac{b}{a_x}\}$, otherwise update the lower bound to $\max\{lb_x,\frac{b}{a_x}\}$.
 For the equality $a\cdot x = b$, both bounds are updated.
-	\item If $\Neg_S(x)=\emptyset$ for an $x\in Y$ (implying that $x$ does not occur in an equality) then remove $\Pos_S(x)$ from $S$. If $\Neg_S(x)$ only consist of the inequality defining the lower bound of $x$, $-x\leq -lb_x$, then substitute $x$ with $lb_x$ in all constraints in $S$. Similarly w.r.t. $\Pos_S(x)$. We notice that this is \emph{not} a normal preprocessing step, but corresponds to making a FME on $x$, which changes the feasible area of $S$. 
+	\item If $\Neg_S(x)=\emptyset$ for an $x\in Y$ (implying that $x$ does not occur in an equality and has no (finite) lower bound) then remove $\Pos_S(x)$ from $S$. If $\Neg_S(x)$ only consist of the inequality defining the lower bound of $x$, $-x\leq -lb_x$, then substitute $x$ with $lb_x$ in all constraints in $S$. Similarly w.r.t. $\Pos_S(x)$. We notice that this is \emph{not} a normal preprocessing step, but corresponds to making a FME on $x$, which changes the feasible area of $S$. 
 \setcounter{counterName}{\value{enumi}}
 \end{enumerate}
-For each inequality we also maintain an upper and lower bound (which potentially is $\pm$ infinity) for its left-hand-side. At a feasible point for $S$, the upper bound for the constraint $c$ with left-hand-side $\ve{a}\cdot\ve{x}$ is thus $\mi{ub}_c = \smashoperator[r]{\sum_{x. a_x>0}}a_x\cdot ub_x + \smashoperator[r]{\sum_{x.a_x<0}}a_x\cdot lb_x$. Similarly, $c$'s lower bound is given by $\mi{lb}_c = \smashoperator[r]{\sum_{x.a_x>0}}a_x\cdot lb_x + \smashoperator[r]{\sum_{x.a_x<0}}a_x\cdot ub_x$.
+For each inequality we also maintain an upper and lower bound (which potentially is $\pm \infty$) for its left-hand-side. At a feasible point for $S$, the upper bound for the constraint $c$ with left-hand-side $\ve{a}\cdot\ve{x}$ is thus $\mi{ub}_c = \smashoperator[r]{\sum_{x. a_x>0}}a_x\cdot ub_x + \smashoperator[r]{\sum_{x.a_x<0}}a_x\cdot lb_x$. Similarly, $c$'s lower bound is given by $\mi{lb}_c = \smashoperator[r]{\sum_{x.a_x>0}}a_x\cdot lb_x + \smashoperator[r]{\sum_{x.a_x<0}}a_x\cdot ub_x$.
 These bounds might again imply tighter bounds for the variables. 
 \begin{enumerate} \itemsep0em
 \setcounter{enumi}{\value{counterName}}

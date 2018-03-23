@@ -64,7 +64,7 @@ Gauss-elimination prior to FME is also done e.g. in \cite{simon05}.
 \subsection{Redundancy removal}
 \paragraph{Using optimization software}
 %As mentioned, an inequality in $S$ is redundant iff its left-hand-side can never exceed its right-hand-side when the values are restricted by all the other constraints of $S$. 
-To detect redundancy, we examine each inequality $c: \ve{a}\cdot \ve{x}\leq b$ in turn and remove it from the system if $\max \ve{a}\cdot \ve{x}$ subject to $S\setminus\{c\}$ is less than or equal to $b$. The property is checked using the optimization software \texttt{cplex}. Though equalities could be examined this way too, we only examines and remove \underline{in}equalities, since we want to keep the equalities for use in Gauss-elimination.
+To detect redundancy, we examine each inequality $c: \ve{a}\cdot \ve{x}\leq b$ in turn and remove it from the system if $\max \ve{a}\cdot \ve{x}$ subject to $S\setminus\{c\}$ is less than or equal to $b$. The property is checked using the optimization software CPLEX. Though equalities could be examined this way too, we only examines and remove \underline{in}equalities, since we want to keep the equalities for use in Gauss-elimination.
 
 Not all inequalities have to be examined, though. When removing redundancy from $S' = \mi{proj}_{\{x\}}S$ we do not need to check inequalities in $\mi{Zero}_S(x)$; if they were non-redundant before the elimination, they will be non-redundant after.
 

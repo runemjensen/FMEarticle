@@ -2,20 +2,20 @@
 %\begin{document}
 
 \section{Results}
-\subsection{What has been done}
-We have considered a number of different models, where the weight and hydrostatics are taken into account to various degrees. The first model does not consider the weight of the containers at all, the second model only considers the total weight-limit, and the subsequent models consider the hydrostatic constraints at 2, 4, 6 and 8 measure points, respectively.
+%\subsection{What has been done}
+From data for a specific vessel, we have constructed a number of different models, where the weight and hydrostatics are taken into account to various degrees. The first model does not consider the weight of the containers at all (i.e. the described constraints limiting the total displacement as well as all hydrostatic constraints have been removed), the second model does not model any hydrostatic constraints, and the subsequent models consider the hydrostatic constraints at 2, 4, 6 and 8 measure points, respectively.
 
-Each model has been projected, such that only the variables denoting the number of each type of containers is left, that is, all variables but $\set{y_\tau}{\tau\in T}$ \red{[check name]} are eliminated. 
-Projections have been done in two different ways, \emph{flat} and \emph{decomposed}. For the decomposed projections, a tree structure has been used as described in Section~\ref{sec:dec}, while the flat projection does not use any decomposition at all. \red{The particular used decompositions can be found in the appendix}. 
-
-The original and the projected models have been optimized for revenue, and objective value as well as time taken has been compared. The latter is measured in both iterations and \emph{ticks} as it appears when solved with cplex \red{version..}. Ticks is a deterministic time measure that according to the software provider ``yields the same level of performance for repeated solving of the same model with the same parameter settings, on the same computing platform''\footnote{\url{https://www.ibm.com/support/knowledgecenter/SSSA5P_12.5.0/ilog.odms.studio.help/CPLEX/ReleaseNotes/topics/releasenotes125/newDetTime.html}}. 
-The revenue is dependent on the container type, so that ``limiting'' container types yields higher revenue. %For our tests, reefer containers has the double revenue of the similar non-reefer type, while heavy containers gives a higher revenue than lighter containers. \red{should probably write the whole thing}. 
-
+Each model has been projected, such that only the variables denoting the number of each type of containers is left, that is, all variables but $\set{x_\tau}{\tau\in T}$ are eliminated. 
+Projections have been done in two different ways, decomposed and flat. For the decomposed projections, a tree structure has been used as described in Section~\ref{sec:decomp}, while the flat projection does not use any decomposition at all. %\red{The particular used decompositions can be found in the appendix}. 
 The projections were done on a \red{...} computer with \red{...} .
-\subsection{Size}
-The results of the mentioned projections are summarized in Table~\ref{tab:projections}. The table shows the size of the original (unprojected) models and the projected model (found by decomposition), given in terms of the number of inequalities (ineqs), variables (vars), non-zero entries (nzs.) and density (dens.). The size of the original model is given both as they appear as input to our algorithm, but also after a \red{competitive} preprocessing, namely after cplex has preprocessed it. 
 
-\begin{table}
+The original and the projected models have been optimized for revenue, and objective value as well as time taken has been compared. The latter is measured in both iterations and \emph{ticks} as it appears when solved with CPLEX Interactive Optimizer version 12.5.0.0. Ticks is a deterministic time measure that according to the software provider ``yields the same level of performance for repeated solving of the same model with the same parameter settings, on the same computing platform''\footnote{\url{https://www.ibm.com/support/knowledgecenter/SSSA5P_12.5.0/ilog.odms.studio.help/CPLEX/ReleaseNotes/topics/releasenotes125/newDetTime.html, March 22, 2018}}. 
+The revenue is dependent on the container type, so that the container types that (in the industry) are found more limiting also yields a higher revenue, see further below. 
+
+\subsection{Size reduction}
+Table~\ref{tab:projections} summarizes the size of the original (unprojected) VMs and the projected models that are the result of the projection using decomposition. These sizes are given in terms of the number of inequalities (ineqs), variables (vars), non-zero entries (nzs.) and density (dens.). The size of the original models are given both as they appear as input to our algorithm, but also after a {competitive} preprocessing, namely after it has been preprocessed by CPLEX. For comparison, the table includes the simple capacity model for the particular vessel we have used. This model is the one currently used in the industry, and it only includes upper bounds on the total number of containers, the total number of reefer containers, and the total weight.  
+
+\begin{table}[htbp]
 \centering
 \begin{tabular}{l|r@{ / }r@{ / }r@{ / }r|r@{ / }r@{ / }l@{ / }r|r@{ / }r@{ / }r@{ / }r}%|rr}
 \toprule
@@ -31,25 +31,25 @@ $\multirow{2}{*}{Model}$&\multicolumn{4}{c|}{Original size}&\multicolumn{4}{c|}{
 \bottomrule
 \multicolumn{10}{c}{}\\
 \cmidrule{1-9}
-Naive model & 3&12 &\phantom{12}36&12.00&3&9&\phantom{12}24&\multicolumn{1}{l}{8.00}\\
+Simple model & 3&12 &\phantom{12}36&12.00&3&9&\phantom{12}24&\multicolumn{1}{l}{8.00}\\
 \cmidrule{1-9}
 \end{tabular}
-\caption{Size of systems (models), before and after projections. Size of naive model for comparison. }
+\caption{The size of the systems (VMs), before and after projection, given in terms of the number of inequalities (ineqs), variables (vars), non-zero entries (nzs.), and density (dens.) The size of the simple capacity model is included for comparison. }
 \label{tab:projections}
 \end{table}
-The numbers show that the projected models have much fewer inequalities and variables, namely app. 6 - 30 times fewer inequalities and 54-57 times fewer variables than the presolved systems. The projected systems also have fewer non-zero entries (between 3 and 24 times fewer), though, the projected models are more dense (app. 1.3 to 1.9 more dense than the presolved systems).
+The results show that the projected models have much fewer inequalities and variables, namely app. 6 - 30 times fewer inequalities and 54-57 times fewer variables than even the presolved systems. The projected systems also have fewer non-zero entries (between 3 and 24 times fewer), though, the projected models are more dense (app. 1.3 to 1.9 more dense than the presolved systems).
 
-The results reveal no apparent \red{[/direct]} relationship between the size of the original model and the size of the projection, which probably have to do with both the actual position of the hydrostatic measure points and the undeterministic behaviour of the removal of almost redundant inequalities. 
+The results reveal no apparent relationship between the size of the original model and the size of the projection, which probably have to do with both the actual position of the hydrostatic measure points and the undeterministic behaviour of the removal of almost redundant inequalities. 
 
 \subsection{Decomposition}
-Table~\ref{tab:time} shows the time taken for the algorithm to do the projection, both decomposed and flat. For most models, the flat projection timed out (TO), in which case the time limit and the variables left to be projected is given.
-Figure~\ref{fig:8parts} shows the progression of the number of inequalities and variables, respectively, as the algorithm runs on the decomposed 8 part-model. Likewise, Figure~\ref{fig:compare} shows the progression for the flat projection of the same model; this figure includes the number of inequalities for the decomposed projection for comparison. Each graph shows the number of inequalities and variables after the preprocessing step, each Gauss-elimination, and each FM-elimination followed by some preprocessing, parallel redundancy removal and sequential removal of almost redundant inequalities.    
-\begin{table}
+Table~\ref{tab:time} shows the time taken for the algorithm to do the projection, both decomposed and flat. For most models, the flat projection timed out (TO) after 65 hours, in which case the variables left to be projected is given.
+Figure~\ref{fig:8parts} shows the progression of the number of inequalities and variables, respectively, as a function of time when the algorithm runs on the decomposed 8 part-model. These numbers are the sum of all the inequalities and variables, respectively, in all the projected or unprojected subsystems in the decomposition at a given time. Likewise, Figure~\ref{fig:compare} shows the progression for the flat projection of the same model; this figure includes the number of inequalities for the decomposed projection for comparison. Each graph shows the number of inequalities and variables after the preprocessing step, each Gauss-elimination, and each FM-elimination followed by some preprocessing, parallel redundancy removal and sequential removal of almost redundant inequalities.    
+\begin{table}[htbp]
 \centering
 \begin{tabular}{l|r@{\hspace{-3em}}rc|rc}
 \toprule
 $\multirow{2}{*}{Model}$&\multicolumn{5}{c}{Time}\\
-&\multicolumn{2}{r}{decomp.}& vars left &flat&vars left\\
+&\multicolumn{2}{r}{decomp.}& vars left to project&flat&vars left to project\\
 \midrule
 {No weights}& &24.5m&-&2.5m&-\\% (and it's smaller)\\ 24m 36s 2m 30s
 {No hydro.}& &14.5m&-&1.8m&-\\% (!) (and it's smaller)\\14m29s%4h 35m 59s&1m 48s
@@ -59,42 +59,46 @@ $\multirow{2}{*}{Model}$&\multicolumn{5}{c}{Time}\\
 {8 parts} &3h&19m &-&(TO) 65h& 566\\ %3h 18m 37s, 578
 \bottomrule
 \end{tabular}
-\caption{Size of projections}
+\caption{Time taken to do the projections, using decomposition or not (flat), respectively. The time limit is set to 65 hours.}
 \label{tab:time}
 \end{table}
 
-\begin{figure}
+From the results in Table~\ref{tab:time}, it is clear that the decomposition has a huge impact on the success of the projection algorithm when the system includes
+%has a none-negligible number of ``interacting'' global constraints as the models with 
+hydrostatic constraints.
+The table also shows, that the two smallest systems that does not take hydrostatic constraints into consideration are solved faster using a flat projection. This behaviour is not surprising, since the hydrostatic constraints are dense, global constraints that links the weight of all sections to the left or right of a measure point, and the coefficients in the constraints are non-trivial. Thus, when these are included, decomposition is extremely useful while not necessary for the simpler systems.
+ 
+\begin{figure}[htbp]
 	\centering
-		\includegraphics[scale=0.6]{figures/project8parts.PNG}
+		\includegraphics{figures/decompIneqGrowth.pdf}
 	\caption{The inequalities growth and variable decrease for the 8 part-model with decomposition.}
 	\label{fig:8parts}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
 	\centering
-		\includegraphics[scale=0.6]{figures/compare.PNG}
+		\includegraphics{figures/ineqGrowth.pdf}
 	\caption{The inequalities growth for the 8 part-model with and without decomposition.}
 	\label{fig:compare}
 \end{figure}
-When considering each subsystem in a decomposition as a system in itself, in generel, the number of inequalities after the FM step grows, as well as the number of inequalities before the FM step, until there are a few variables left, where both these numbers decrease. Notice, that the graph in Figure~\ref{fig:8parts} shows the total run of the projection algorithm, causing this pattern to be repeated.
 
-For the decomposed algorithm, though the number of inequalities grow after each FM-step, most of them are redundant or almost redundant. The same does not hold for the flat-version for the cases where hydrostatics are taken into consideration. Instead, many of the produced inequalities are non-redundant which increases the likelyhood that even more inequalities will be produced in the next elimination, but also that the redundancy removal will take longer time - not only are there more inequalities to check, each check will also take longer. 
-\red{Though this just speculations, it appears that the flat projection of the total system on a ``global'' scale behaves as a ``enlarged'' version of described pattern for the subsystems.}
+When considering each subsystem in a decomposition as a system in itself, in general, the number of inequalities after each call to \Call{FME-SingleVar}{} in Algorithm~\ref{alg:FMEF} grows to begin with, as does the number of inequalities before this call. This continues until there are a few variables left, where both these numbers decrease. Notice, that the graph in Figure~\ref{fig:8parts} shows the total run of the projection algorithm, causing this pattern to be repeated. Hence it may be hard to see this in the figure.
 
-\red{This behaviour can be explained by the occurence of several ``interacting'' transverse/global inequalities (as described previously), since the algorithm projects a few variables from one subsystem (resulting in a little denser global constraints) before moving on to the next subsystem from where it removes another few variables etc., all the while it postpones dealing with the variables in the global inequalities which get more and more dense.}
+For the decomposed algorithm, though the number of inequalities grow after each FME-step, most of them are redundant or almost redundant. The same does not hold for the flat projection for the cases where hydrostatics are taken into consideration, at least not for the FME-steps that are completed within the time limit. Instead, many of the produced inequalities are non-redundant which increases the likelyhood that even more inequalities will be produced in the next elimination, but also that the redundancy removal will take longer time - not only are there more inequalities to check, each check will also take longer. 
+{Though this is just speculations, since the flat projections were not finished due to time and memory constraints, it appears that the flat projection of the total system on a ``global'' scale behaves as an ``enlarged'' version of described pattern for the subsystems.}
 
-It is clear that the decomposition has a huge impact on the success of the projection algorithm when the model/system has a none-negligible number of ``interacting'' global inequalities.
+{This behavior can be explained by the occurrence of several ``interacting'' global constraints: the algorithm projects a few variables from one subsystem (resulting in a little denser global constraints) before moving on to the next subsystem from where it removes another few variables etc., all the while it postpones dealing with the variables in the global inequalities which get more and more dense.}
 
 It should be mentioned that it is possible, that other orderings of the variables (caused by other heuristics then the used greedy heuristic) in these cases could potentially lead to manageable flat projections, but testing this is outside the scope of this paper.  
-\red{[It should likewise be mentioned that the runtime, even for the decomposed projections, are not exactly small. The main part of the execution time is spend doing redundancy removal.]}
+We also note that the runtime, even for the decomposed projections, are not exactly small, and the main part of the execution time is spend doing redundancy removal. However, as mentioned in the introduction, these calculations are off-line that should be done once, after which they can be used as submodels in other optimization models.  
 
 \subsection{Revenue optimization}
-%For our tests, reefer containers has the double revenue of the similar non-reefer type, while heavy containers gives a higher revenue than lighter containers. \red{should probably write the whole thing}. 
-The original and the projected models have been optimized for revenue using cplex. Each transported container yields a revenue which is based on its type, i.e. on the size, weight and refer-property of the container types. More specifically, for our tests, reefer containers yields the double revenue as a similar non-reefer container, 40' containers have a revenue which is 1.5 times higher as a similar 20' container, while containers are more expensive the heavier it is. \red{[For a 20', non-reefer container, with a weight, respectively of 6, 21 and 27 t, the revenue is, respectively set to 100, 600 and 700 \$.]}   
+The original and the projected models have been optimized for revenue using CPLEX. 
+Each transported container yields a revenue which is based on its type, i.e. on the size, weight and reefer-property of the container. More specifically, for our tests, reefer containers yields the double revenue as a similar non-reefer container, 40' containers have a revenue which is 1.5 times higher as a similar 20' container, while containers are more expensive the heavier it is. A 20', non-reefer container, with a weight, respectively of 6, 21, and 27 ton, is assigned the following revenue in USD: 100, 600 and 700, respectively.   
 
-Table~\ref{tab:usingProjections} shows the number of iterations, the deterministic time and the objective value found by cplex when optimizing revenue for the original and projected models. It likewise how many times faster, the projections are w.r.t. iteration and ticks, as well as the difference in objective value in percentage. For comparison, te number of iterations, deterministic time and objective vaule is shown for the naive model too. \red{[I should compare with the naive model as well, but I don't see how I should do that]}
+Table~\ref{tab:usingProjections} shows the number of iterations, the deterministic time and the objective value found by CPLEX when optimizing revenue for the original and projected models. It likewise shows how many times faster, the projections are w.r.t. iteration and ticks, as well as the difference in objective value in percentage. For comparison, the number of iterations, deterministic time and objective value is shown too for the simple model, which was mentioned previously. %\red{[I should compare with the naive model as well, but I don't see how I should do that]}
 
-\begin{table}
+\begin{table}[htbp]
 \centering
 \begin{tabular}{l|rrr|rrr|rrr}
 \toprule
@@ -127,42 +131,41 @@ No weights&	11 & 0.05 & $8.63\cdot 10^6$ &	363 & 2.64&$8.08\cdot 10^6$
 \bottomrule
 \multicolumn{10}{c}{}\\
 \cmidrule{1-4}
-Naive model & 4 & 0.02 & $1.07\cdot 10^7$\\
+Simple model & 4 & 0.02 &\multicolumn{2}{l}{$1.07\cdot 10^7$}\\
+%imple model & 3&12 &\phantom{12}36&12.00&3&9&\phantom{12}24&\multicolumn{1}{l}{8.00}\\
 %\red{Full model (26 parts) }& 170 & 1.90 & $6.23\cdot 10^6$\\
 \cmidrule{1-4}
 \end{tabular}
-\caption{Iterations, time and objective values for projected and unprojected models, as well as for the naive model. }
+\caption{Iterations, time and objective values for projected and unprojected models, as well as for the simple model. }
 \label{tab:usingProjections}
 \end{table}
-As can be seen from the numbers in Table~\ref{tab:usingProjections}, in general, projections are much faster than the unprojected models. More specifically there are between app. 17 and 33 times fewer iterations and 20-137 times fewer ticks, which corresponds to a difference between 94 and 97 \% of the number of iterations, and 96 and 99.5 \% cplex ticks, respectively. 
+As can be seen from the numbers in Table~\ref{tab:usingProjections}, in general, projections are much faster than the unprojected models. More specifically there are between app. 17 and 33 times fewer iterations and 20-137 times fewer ticks, which corresponds to a difference between 94 and 97 \% of the number of iterations, and 96 and 99.5 \% CPLEX ticks, respectively. 
 Meanwhile the difference in objective value is only modest; for the models including hydrostatic constraints, the difference is at most 0.5 \%, while the other two models have a difference of 6.8 and 26.5 \%, respectively. 
 
-\red{For most of the models, the objective is bigger - allowing more than it should, except for the model with a 6 part division, which allows less %[does that mean, there was a mistake, or is this theoretically possible. I think it is possible.] 
-[There is not that big a difference between the objectives for many versus few parts, which is probably due to the fact that we fill an empty vessel - but let's not get into that]}
+%\red{For most of the models, the objective is bigger - allowing more than it should, except for the model with a 6 part division, which allows less %[does that mean, there was a mistake, or is this theoretically possible. I think it is possible.] 
+%[There is not that big a difference between the objectives for many versus few parts, which is probably due to the fact that we fill an empty vessel - but let's not get into that]}
 
 
-\red{I should also do some comparisons with the naive model, but which?} 
-When comparing to the naive model, we see that this model of course is even faster (between 41-97 times (iterations) and 132-294 (ticks)), but the difference in objective is also between 72 and 76 \% for the last 5 models, while it is 32 \% for the model without any weights. 
+%\red{I should also do some comparisons with the naive model, but which?} 
+When comparing to the simple model, we see that this model of course is even faster (between 41-97 times (iterations) and 132-294 (ticks)), but the difference in objective is also between 72 and 76 \% for the last 5 models, while it is 32 \% for the model without any weights. 
 
+\subsection{Projection of multi-commodity flow problem}
+%It is not only for cargo models/the domain of vessel stowage that it is relevant/useful to eliminate variables irrelevant for analysis of a model at a ``higher level'' than where it is modelled. 
+%As another example, consider e.g. a multi-commodity flow graph $G=(V,E)$, where commodities $c_1$ to $c_k$ flow through the graph from sources ($S\subseteq V$) to sinks ($T\subseteq V$), and each edge have limits for each commodity as well as a joint limit. 
+%For a number of applications it would be of interest to know how much can flow from the source-nodes to the sinks, or more specifically, how the amount/number of each commodity at the sinks ($x_{t, c_i}$ for all $t\in T$ and $1\leq i\leq k$) depends on the amount/number of the commodities at the sources ($x_{s, c_i}$ for all $s\in S$ and $1\leq i\leq k$). {Notice that in this scenario, the demand of each commodity is not fixed/given.}. For this purpose, we are uninterested in the amount/number of each commodity that flows at each edge of the graph, and to get a description of the direct relationship between the inflow-variables and the outflow-variables, the other variables should therefore be eliminated from the system describing the multi-commodity flow problem. 
 
-%\[
-%1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
-%\]
+Besides the vessel models, we have also considered another block-angular structured system, namely one describing a multi-commodity flow problem. In a multi-commodity flow graph $G=(V,E)$ with $k$ commodities, we have a positive variable $x_{e,i}$ for each edge $e\in E$ and commodity $1\leq i\leq k$, which denotes the number of goods of commodity $i$ that flows on the edge $e$. There is an upper bound on each $x_{e,i}$ as well as a common upper bound for the sum of commodities on an edge. Further, there are constraints to ensure that for all commodities $i$ and all nodes $n$ -- except for source nodes $S\subseteq V$ and sink nodes $T\subseteq V$ -- that the sum of goods of commodity $i$ on edges going to $n$ equals the sum of good of commodity $i$ on edges going away from $n$.
 
-\subsection{Projection of multi commodity flow graphs}
-It is not only for cargo models/the domain of vessel stowage that it is relevant/useful to eliminate variables irrelevant for analysis of a model at a ``higher level'' than where it is modelled. 
-As another example, consider e.g. a multi-commodity flow graph $G=(V,E)$, where commodities $c_1$ to $c_k$ flow through the graph from sources ($S\subseteq V$) to sinks ($T\subseteq V$), and each edge have limits for each commodity as well as a joint limit. 
-For a number of applications it would be of interest to know how much can flow from the source-nodes to the sinks, or more specifically, how the amount/number of each commodity at the sinks ($x_{t, c_i}$ for all $t\in T$ and $1\leq i\leq k$) depends on the amount/number of the commodities at the sources ($x_{s, c_i}$ for all $s\in S$ and $1\leq i\leq k$). {Notice that in this scenario, the demand of each commodity is not fixed/given.}. For this purpose, we are uninterested in the amount/number of each commodity that flows at each edge of the graph, and to get a description of the direct relationship between the inflow-variables and the outflow-variables, the other variables should therefore be eliminated from the system describing the multi-commodity flow problem. 
+Considering the case where demands and supply are not given, we want to know how much can flow from the source-nodes to the sinks, or more specifically, how the amount of goods of each commodity at the sinks depends on the amount of goods of the commodities at the sources. Therefore we eliminate all variables $x_{e,i}$, where $e\notin S\cup T$, from the constraint system describing the flow problem.
 		
-A multi-commodity flow problem is naturally block-structured, though, there are usually many global constraints -- corresponding to the common upper limits for each edge. Instead of using these blocks to decompose the system, it is also possible to divide the graph into smaller subgraphs. We then treat the ingoing edges in a subgraph $G'$ as sources ($S_{G'}$) and the outgoing edges as sinks ($T_{G'}$), and eliminate all variables but $\set{x_{v,c_i}}{v\in S_{G'}\cup T_{G'}}$ from the inequality systems describing the flow problem in $G'$. Afterwards, these  subgraphs are successively combined into larger graphs $\tilde{G}$ from which all but $\set{x_{v,c_i}}{v\in S_{\tilde G}\cup T_{\tilde G}}$ are eliminated. 
+A multi-commodity flow problem is naturally block-structured, though, there are usually many global constraints -- corresponding to the common upper limits for each edge. Instead of using these blocks to decompose the system, it is also possible to divide the graph into smaller subgraphs. We then treat the ingoing edges in a subgraph $G'$ as sources ($S_{G'}$) and the outgoing edges as sinks ($T_{G'}$), and eliminate all variables but $\{\;x_{e,i}\;|\; e\in \bigcup_{n\in S_{G'}}out(n)\cup \bigcup_{n\in T_{G'}}in(n), 1\leq i\leq k\;\}$ from the inequality systems describing the flow problem in $G'$. Afterwards, these  subgraphs are successively combined into larger graphs $\tilde{G}$ from which all but $\{\;x_{e,i}\;|\; e\in \bigcup_{n\in S_{\tilde G}}out(n)\cup \bigcup_{n\in T_{\tilde G}}in(n), 1\leq i\leq k\;\}$ are eliminated. 
 
-\paragraph{Results}
-\red{What/how much to write about how I made the graph?]}
-To show this point, we have generated a flow graph \red{inspired by the problems that can be found in...}. The graphs consists of 7 ``layers'' consisting of 3 nodes each, and there are 2 commodities. From each node at a given level, there is a (directed) edge to each node at the next level. Sources are composed of the nodes at the first level, while the nodes at the last level constitutes the sinks. The capacity for each commodity $c_i$ and edge $e$ is 0 with a probability of 5\% and otherwise drawn from a uniform distribution between 5 and 15, while the common capacity of the edge e is 0 with probability 25\% and otherwise a number drawn from the uniform distribution between $s$-10 and $s$, where $s$ is the sum of the individual cpacities on that edge.
 
-Similarly to Table~\ref{tab:}, Table~\ref{tab:multicom} shows the size of the original model (both as modelled and presolved) and the projections resulting from a flat and decomposed projection, respectively. Both projections finished and the time taken to make them is also shown. Figure~\ref{fig:multicom} shows the progression over time of the number of inequalities and number of variables left to be projected, for both the flat and decomposed projection algorithm.
+For testing our framework on a flow graph, we have generated one inspired by the problems in the collection Chen.DSP collected by Jones, Lustig and Farwolden \cite{JLFP93}. The constructed graph consists of 7 ``layers'' consisting of 3 nodes each, and there are 2 commodities. From each node at a given level, there is a directed edge to each node at the next level. Sources are composed of the nodes at the first level, while the nodes at the last level constitutes the sinks. The capacity for each commodity $c_i$ and edge $e$ is 0 with a probability of 5\% and otherwise drawn from a uniform distribution between 5 and 15, while the common capacity of the edge e is 0 with probability 25\% and otherwise a number drawn from the uniform distribution between $s$-10 and $s$, where $s$ is the sum of the individual cpacities on that edge.
 
-\begin{table}
+Similarly to Table~\ref{tab:projections}, Table~\ref{tab:multicom} shows the size of the original model (both as modelled and presolved) and the projections resulting from a flat and decomposed projection, respectively. Both projections finished and the time taken to make them is also shown. Figure~\ref{fig:multicom} shows the progression over time of the number of inequalities and number of variables left to be projected, for both the flat and decomposed projection algorithm.
+
+\begin{table}[htbp]
 \centering
 \begin{tabular}{l|r@{ / }r@{ / }r@{ / }r|r}
 \toprule
@@ -171,20 +174,21 @@ $\multirow{2}{*}{Model}$&\multicolumn{4}{c|}{Size}&{Time}\\
 \midrule
 Original&204 (42)& 120& 444&2.17&-\\
 Presolved& 59& 79& 201&3.41&-\\
-Projected, decomposed& 17 (2)& 12& 61&3.59& 2h 9m \\
-Projected, flat& 17 (2)& 12& 53&3.12& 17h 41 m\\
+Projected, decomposed& 17 (2)& 12& 61&3.59& 2h \phantom{9}9m \\
+Projected, flat& 17 (2)& 12& 53&3.12& 17h 41m\\
 \bottomrule
 \end{tabular}
-\caption{Size of projection of multicommodity flow model}
+\caption{Size of projection of a multi-commodity flow model.}
 \label{tab:multicom}
 \end{table}
 
-We see a reduction in the number of inequalities, variables and non-zero entries, of 3.5, 6.6, and 3.3/3.8 times, respectively (in both cases) compared to the presolved model. The density stays almost the same; for the decomposed model, the density increases with 5.3 \%, while the density decreases with 8.5\% for the flat projection.
+Also here, we see a reduction in the number of inequalities, variables and non-zero entries, of 3.5, 6.6, and 3.3/3.8 times, respectively (in both cases) compared to the presolved model. The density stays almost the same; for the decomposed model, the density increases with 5.3 \%, while the density decreases with 8.5\% for the flat projection.
+This is not as big a reduction as for the VMs, however, the unprojected models are also smaller to begin with. 
 
 \begin{figure}
 	\centering
-		\includegraphics[scale=0.6]{figures/multicom.PNG}
-	\caption{Number of inequalities and variables during flat and decomposed projection of a multi commodity flow problem}
+		\includegraphics{figures/multicomGraph.pdf}
+	\caption{The number of constraints and variables as a function of time during a flat and and a decomposed projection, respectievly, of a multi-commodity flow problem.}
 	\label{fig:multicom}
 \end{figure}
 

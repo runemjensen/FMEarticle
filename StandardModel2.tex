@@ -2,12 +2,12 @@
 
 %\begin{document}
 \section{Vessel Model}
-In this section we will describe the data given for a stowage model, and we will explain how this information is translated into our proposed \emph{Vessel Model} (VM).
+In this section we will describe the given vessel date, and we will explain how this information is translated into our proposed \emph{Vessel Model} (VM).
 
 The main purpose of our VM is to 
 {describe the hydrostatic constraints reasonably accurate while}
 abstracting away much of the unnecessary complexity relating to the physical layout of the vessel. 
-More specifically, the buoyancy data used in hydrostatic calculations are given at a set of points along the vessel (stations), while hydrostatic constraints are given in relation to another set of points (frames), and neither of these coincide with the position of the structures holding the cargo or the ballast tanks (see Figure~\ref{fig:vessel}). The measure points are aligned in the VM, and calculations for the hydrostatic constraints are simplified (see Figure~\ref{fig:sectionEndPoints}).
+More specifically, the buoyancy data used in hydrostatic calculations are given at a set of points along the vessel (stations), while hydrostatic constraints are given in relation to another set of points (frames), and neither of these coincide with the position of the structures holding the cargo or the ballast tanks (see Figure~\ref{fig:vessel}(a)). The measure points are aligned in the VM, and calculations for the hydrostatic constraints are simplified (see Figure~\ref{fig:sectionEndPoints}).
 
 The data used as input to the stowage models are real vessel profile files used by a professional loading computer. These vessel profiles have been kindly provided by our industrial partners.
 
@@ -18,17 +18,17 @@ The cargo space of a container vessel is divided into parts called \textit{bays}
 \begin{figure}[hb]
 	\centering
 		\includegraphics{figures/vessel2.pdf}
-	\caption{(a) Vessel structure and reference points seen on a longitudinal intersection X, and (b) on a transversal intersection.}
+	\caption{(a) Vessel structure and reference points seen on a longitudinal intersection and (b) on a transversal intersection.}
 	\label{fig:vessel}
 \end{figure}
 
 To define common reference points for cargo-holding structures and hydrostatic constraints, we further define larger \emph{sections} of the vessel and their endpoints. Each of these sections either span a number of succeeding bays, or a part of the ship containing no bays at all.
-See Figure~\ref{fig:vessel} and Figure~\ref{fig:sectionEndPoints}.
+See Figure~\ref{fig:sectionEndPoints}.
 
 \begin{figure}[hb]
 	\centering
 		\includegraphics{figures/sectionEndPoints.pdf}
-	\caption{Sections on a vessel. Their endpoints will be common reference points for cargo-holding structures and hydrostatic constraints in the VM.}
+	\caption{Sections on a vessel. Their endpoints are used as common reference points for cargo-holding structures and hydrostatic constraints in the VM.}
 	\label{fig:sectionEndPoints}
 \end{figure}
 
@@ -44,9 +44,9 @@ Limits for each ballast tank are likewise given in the input data, as well as a 
 %
 
 \paragraph{Stress forces}
-On a vessel, stress forces arise as a result of gravitation acting downwards and buoyancy acting upwards. This results in shear forces and bending moments along the longitudinal axis of the vessel, and limits on these are given for a set of reference points along the vessel called \emph{frames} (see Figure~\ref{fig:vessel}). 
+On a vessel, stress forces arise as a result of gravitation acting downwards and buoyancy acting upwards. This results in shear forces and bending moments along the longitudinal axis of the vessel, and limits on these are given for a set of reference points along the vessel called \emph{frames} (see Figure~\ref{fig:vessel}(a)). 
 %
-The buoyancy force comes from the vessel's displacement of water and hence depends on the varying (and irregular) shape of the hull and the displacement of the vessel. The area submerged in water is given at another set of reference points called \emph{stations} for a discrete set of displacement values. See Figure~\ref{fig:vessel}.
+The buoyancy force comes from the vessel's displacement of water and hence depends on the varying (and irregular) shape of the hull and the displacement of the vessel. The area submerged in water is given at another set of reference points called \emph{stations} for a discrete set of displacement values (see Figure~\ref{fig:vessel}(a)).
 It is the position of these reference points, that do not line up with bay endpoints, which is remedied in the VM.
 
 Further requirements to ensure the stability of the vessel are imposed in real life and considered eg. in \cite{AlbertosThesis}, but is not considered here.
@@ -78,7 +78,7 @@ Capacities for individual tanks are pooled into capacities for tanks within a se
 We also define constraints to ensure that all variables $x_{s,\tau}$ and $t_s$ are positive and that $w\leq\mi{Max}^\trt{w}$. 
 
 \paragraph{Hydrostatic constraints}
-For a station $\sigma$, the values in the table $A_{\sigma}$ can be used to make an approximation of the submerged area at $\sigma$ for any positive displacement. This is done by linearizing the values between the maximal displacement value given in the table and a displacement value $d_\mi{min}$ at the point where the hull does not curve too much anymore. For the cross-section given in Figure~\ref{fig:vessel} for $\sigma$ this would correspond to the displacement giving rise to the marked waterline.
+For a station $\sigma$, the values in the table $A_{\sigma}$ can be used to make an approximation of the submerged area at $\sigma$ for any positive displacement. This is done by linearizing the values between the maximal displacement value given in the table and a displacement value $d_\mi{min}$ at the point where the hull does not curve too much anymore. For the cross-section given in Figure~\ref{fig:vessel}(b) for $\sigma$ this would correspond to the displacement giving rise to the marked waterline.
 We note that since our VM will mainly be used for some sort of maximization of loaded cargo it is fair to assume that the displacement will be above the found $d_\mi{min}$.
 The submerged area at a point $p$ between two consecutive stations for a given displacement can then also be linearized as a function of $p$. 
 From this, an approximation of the buoyancy of section $s$ for a given $d$ is calculated by averaging the areas between the two endpoints of $s$ and multiplying with the distance between the points and the density of salt water.\footnote{Though all weights in principle have to be multiplied by the gravitational acceleration to get a force, it is a common practice to omit this in these calculations.} If there are stations lying within $s$, several volumes are calculated and added.

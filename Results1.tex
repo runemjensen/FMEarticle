@@ -1,19 +1,19 @@
 %\input{preamble}
 %\begin{document}
 
-\section{Results}
+\section{Results}\label{sec:results}
 %\subsection{What has been done}
 From data for a specific vessel, we have constructed a number of different models, where the weight and hydrostatics are taken into account to various degrees. The first model does not consider the weight of the containers at all (i.e. the described constraints limiting the total displacement as well as all hydrostatic constraints have been removed), the second model does not model any hydrostatic constraints, and the subsequent models consider the hydrostatic constraints at 2, 4, 6 and 8 measure points, respectively.
 
 Each model has been projected, such that only the variables denoting the number of each type of containers is left, that is, all variables but $\set{x_\tau}{\tau\in T}$ are eliminated. 
 Projections have been done in two different ways, decomposed and flat. For the decomposed projections, a tree structure has been used as described in Section~\ref{sec:decomp}, while the flat projection does not use any decomposition at all. %\red{The particular used decompositions can be found in the appendix}. 
-The projections were done on a \red{...} computer with \red{...} .
+The projections were done on a computer with an \red{Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} E5-1660 V4 processor with a frequency of 3.20-3.80 GHz, 32GB RAM, and with 8 cores and 16 threads.}
 
 The original and the projected models have been optimized for revenue, and objective value as well as time taken has been compared. The latter is measured in both iterations and \emph{ticks} as it appears when solved with CPLEX Interactive Optimizer version 12.5.0.0. Ticks is a deterministic time measure that according to the software provider ``yields the same level of performance for repeated solving of the same model with the same parameter settings, on the same computing platform''\footnote{\url{https://www.ibm.com/support/knowledgecenter/SSSA5P_12.5.0/ilog.odms.studio.help/CPLEX/ReleaseNotes/topics/releasenotes125/newDetTime.html, March 22, 2018}}. 
 The revenue is dependent on the container type, so that the container types that (in the industry) are found more limiting also yields a higher revenue, see further below. 
 
 \subsection{Size reduction}
-Table~\ref{tab:projections} summarizes the size of the original (unprojected) VMs and the projected models that are the result of the projection using decomposition. These sizes are given in terms of the number of inequalities (ineqs), variables (vars), non-zero entries (nzs.) and density (dens.). The size of the original models are given both as they appear as input to our algorithm, but also after a {competitive} preprocessing, namely after it has been preprocessed by CPLEX. For comparison, the table includes the simple capacity model for the particular vessel we have used. This model is the one currently used in the industry, and it only includes upper bounds on the total number of containers, the total number of reefer containers, and the total weight.  
+Table~\ref{tab:projections} summarizes the size of the original (unprojected) VSMs and the projected models that are the result of the projection using decomposition. These sizes are given in terms of the number of inequalities (ineqs), variables (vars), non-zero entries (nzs.) and density (dens.). The size of the original models are given both as they appear as input to our algorithm, but also after a {competitive} preprocessing, namely after it has been preprocessed by CPLEX. For comparison, the table includes the simple capacity model for the particular vessel we have used. This model is the one currently used in the industry, and it only includes upper bounds on the total number of containers, the total number of reefer containers, and the total weight.  
 
 \begin{table}[htbp]
 \centering
@@ -34,7 +34,7 @@ $\multirow{2}{*}{Model}$&\multicolumn{4}{c|}{Original size}&\multicolumn{4}{c|}{
 Simple model & 3&12 &\phantom{12}36&12.00&3&9&\phantom{12}24&\multicolumn{1}{l}{8.00}\\
 \cmidrule{1-9}
 \end{tabular}
-\caption{The size of the systems (VMs), before and after projection, given in terms of the number of inequalities (ineqs), variables (vars), non-zero entries (nzs.), and density (dens.) The size of the simple capacity model is included for comparison. }
+\caption{The size of the systems (VSMs), before and after projection, given in terms of the number of inequalities (ineqs), variables (vars), non-zero entries (nzs.), and density (dens.) The size of the simple capacity model is included for comparison. }
 \label{tab:projections}
 \end{table}
 The results show that the projected models have much fewer inequalities and variables, namely app. 6 - 30 times fewer inequalities and 54-57 times fewer variables than even the presolved systems. The projected systems also have fewer non-zero entries (between 3 and 24 times fewer), though, the projected models are more dense (app. 1.3 to 1.9 more dense than the presolved systems).
@@ -183,7 +183,7 @@ Projected, flat& 17 (2)& 12& 53&3.12& 17h 41m\\
 \end{table}
 
 Also here, we see a reduction in the number of inequalities, variables and non-zero entries, of 3.5, 6.6, and 3.3/3.8 times, respectively (in both cases) compared to the presolved model. The density stays almost the same; for the decomposed model, the density increases with 5.3 \%, while the density decreases with 8.5\% for the flat projection.
-This is not as big a reduction as for the VMs, however, the unprojected models are also smaller to begin with. 
+This is not as big a reduction as for the VSMs, however, the unprojected models are also smaller to begin with. 
 
 \begin{figure}
 	\centering

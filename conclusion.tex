@@ -1,0 +1,20 @@
+%\input{preamble}
+
+%\begin{document}
+\section{Conclusion}\label{sec:concl}
+For a liner shipping company, accurate capacity models that succinctly represent the trade-off between the different types of containers are important in many areas such as uptake management, capacity management, network management, and fleet management. Although previous work on stowage models in principle provide fine-grained capacity models, they cannot readily be used in practice as such, since they are too big.
+As an alternative, we have developed a framework based on Fourier-Motzkin elimination that automatically translates a linear stowage model into a smaller sized capacity model by projecting unneeded variables. The framework utilizes preprocessing, variable elimination (FME and Gauss-elimination), a parallel redundancy removal, as well as a boundary coarsening (removal of almost redundant inequalities). It uses a novel decompistion method that exploits the block-angular structure of the problem to speed up the projection.
+
+Our results show that the projected models are reduced by an order of magnitude both in number of inequalities and number of non-zero entries. The models including hydrostatic constraints are solved 20-35 times faster than their corresponding stowage models while the difference in objective value is 0.15-0.5 \%. For the models not including hydrostatic constraints, the speed-up is bigger, but so is the loss of accuracy, too. The more realistic models including hydrostatic constraints are therefore better suited as submodels in optimization tasks within e.g. capacity management. 
+
+Our framework makes use of a decomposition of the block-angular structure of the stowage models, and this decomposition drastically improves the runtime of the projections of the more complex stowage models that include hydrostatic constraints. These constraints are dense global constraints %that use the same variables with different [ikke-pæne] coefficients, 
+which is likely the reason for the bad behavior of the projection when decomposition is not used.
+The block-angular structure is commonly found in linear models, and our projection framework can be used for other problems too than stowage models. As an example, we have considered a multi-commodity flow problem and applied our framework to this as well, and found a similar speed-up as for the stowage models. 
+\\\\
+%Future work
+\red{There are several interesting direction for future work. 
+From an application point of view, it could be interesting to test the models in an actual setting for e.g. uptake management in a flow graph.
+Likewise it could be interesting to try potentially add more constraints to the VSM and/or investigate the limits for the decomposition framework. Of course, in this connection, various optimizations of the framework and its implementation, such as e.g. the mentioned parallellization of the projection of the subsystems of the decomposed system, would be useful to enhance the framework and further speed up the projection.
+Finally, for using the decomposition for different problems, it would be useful to have a procedure, that automatically estimates the best way of decomposing a given system. Finding and testing the framework on more block-angular problems in need of projection would also be of interest.} 
+
+%\end{document}

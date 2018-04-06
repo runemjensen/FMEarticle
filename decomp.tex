@@ -11,7 +11,7 @@ Unfortunately, the global constraints cause the local subsystems to get ``mixed'
 
 However, we can still exploit the structure of the problem. We will define and use auxiliary variables to ensure that we can project the subsystems separately without producing global constraints, before we combine the projected  subsystems and eliminate the auxiliary variables.
  
-\paragraph{Using auxiliary variables to separate blocks}  
+\subsection{Separating blocks}%{Using auxiliary variables to separate blocks}
 To separate and remove local variables from the global constraints, we do as follows for all subsystems $S_i$:
 \begin{itemize}\itemsep0em
 \item For each global constraint $c$ using variables in $S_i$, we define an auxiliary variable $z^0_{c,i}$ that equals the variables in $S_i$'s contribution to $c$. We add the equality defining $z^0_{c,i}$ to $S_i$, and we substitute with $z^0_{c,i}$ in $c$. For example, if $c: a_1x_1 + a_2x_2 + a_3x_3 + \ldots + a_kx_k \leq b$ is an inequality in $S_\trt{g}$ and $X_i = \{x_1,x_2\}$, then we add $-z^0_{c,i} + a_1x_1 + a_2x_2 = 0$ to $S_i$ and rephrase $c$ as $z^0_{c,i} + a_3x_3 + \ldots + a_kx_k \leq b$. 
@@ -21,9 +21,9 @@ We name the thusly produced subsystem $S_i^0$.
 Because of these auxiliary variables this only produces inequalities with variables not present in other subsystems $S_j$. 
 \end{itemize}
 After projecting each $S_i^0$ we can then combine the results with the rephrased, global constraints, $S_\trt{g}^0$, to create the system $\mathcal{S}$, i.e. 
-\[
+\begin{equation}\label{eq:curlyS}
 \mathcal{S} = S^0_\trt{g} \cup S'^0_1\cup \ldots \cup S'^0_k,
-\]
+\end{equation}
 where $S'^0_i$ is the projection of $S^0_i$ w.r.t. $Y\cap X_i$ for all $i\in\{1,\ldots, k\}$.
 We can then eliminate all the auxiliary $z^0$-variables, $Z^0$, plus the variables in $Y$ not occurring in any $S_i$ from $\mathcal{S}$. %This results in a system equivalent to the projection of $S$ w.r.t. $Y$. %; proof can be found i \cite{MyTechRep}.
 
@@ -38,11 +38,11 @@ We can then eliminate all the auxiliary $z^0$-variables, $Z^0$, plus the variabl
 As an example, consider the block-structured problem $S$ illustrated in Figure~\ref{fig:decomp}, where $X_i=\{u_i, w_i\}$ for $i\in\{1,2,3,4,5\}$, and $S_\trt{g}=\{e,c\}$ consists of an equality defining the weighted sum, $e: - \mi{wSum} + 1u_1+ 1w_1 + 2u_2+ 2w_2 + 3u_3+ 3w_3 + 4u_4+ 4w_4 + 5u_5+ 5w_5 = 0$, and another inequality limiting the $w$s, $c: w_1 + w_2 + w_3 + w_4 + w_5\leq 20$. Assume that we want to eliminate all variables but $\mi{wSum}$, that is $Y = \bigcup_{i\in\{1,2,3,4,5\}}\{u_i,w_i\}$.
 
 We then create the subsystems $S^0_1, \ldots, S^0_5$ and $S^0_\trt{g}$, where $S^0_i = S_i \cup 
-\{-z^0_{e,i} + iu_i + iw_i = 0 \} \cup \{ -z^0_{c,i} + w_i = 0 \}$ for $i\in\{1,\ldots,5\}$, while the rephrased global inequalities are $S_\trt{g}^0 = \{-wSum + z^0_{e,1} + z^0_{e,2} + z^0_{e,3} + z^0_{e,4} + z^0_{e,5} = 0 \} \cup \{ z^0_{c,1} +z^0_{c,2} +z^0_{c,3}+z^0_{c,4}+z^0_{c,5} \leq 20\}$.   
+\{-z^0_{e,i} + i\cdot u_i + i\cdot w_i = 0 \} \cup \{ -z^0_{c,i} + w_i = 0 \}$ for $i\in\{1,\ldots,5\}$, while the rephrased global inequalities are $S_\trt{g}^0 = \{-wSum + z^0_{e,1} + z^0_{e,2} + z^0_{e,3} + z^0_{e,4} + z^0_{e,5} = 0 \} \cup \{ z^0_{c,1} +z^0_{c,2} +z^0_{c,3}+z^0_{c,4}+z^0_{c,5} \leq 20\}$.   
 
 To procure the projection of $S$ w.r.t. $Y$ we can then project $S_i^0$ w.r.t. $\{u_i, w_i\}$ for all $i\in\{1,\ldots,  5\}$, join the projections together with $S^0_\trt{g}$ in the system $\mathcal{S}$, and then project $\mathcal{S}$ w.r.t. $\set{z^0_{c,i}, z^0_{e,i}}{1\leq i\leq 5}$. {$\triangledown$}
 
-\paragraph{Equivalent projections}
+%\paragraph{{Equivalent projections}}
 Comparing the union of the new (unprojected) subsystems, $\mathfrak{S} = S_1^0\cup\ldots\cup S_k^0\cup S_\trt{g}^0$, with the original system $S$ it is clear that
 all we have done is defining auxiliary variables and substituted them in the system. Intuitively, it is therefore clear that eliminating the variables in $Y$ from $S$ is equivalent to eliminating $Y$ and the defined $z^0$-variables from $\mathfrak{S}$. 
 
@@ -53,11 +53,13 @@ Any variable in $X_1\cap Y$ has a zero-coefficient in all constraints not in $S^
 
 Thus, the following holds. 
 \begin{prop}
-The projection of $S$ w.r.t. $Y$ defines the same feasible area as 
-the projection of $\mathcal{S}$ w.r.t. $Z^0 \cup Y\setminus (X_1\cup \ldots \cup X_k)$.
+{The projection of $S$ w.r.t. $Y$ defines the same feasible area as 
+the projection of $\mathcal{S}$ w.r.t. $Z^0 \cup Y\setminus (X_1\cup \ldots \cup X_k)$, where
+$\mathcal{S}$ is as defined in \ref{eq:curlyS}.% = S^0_\trt{g} \cup S'^0_1\cup \ldots \cup S'^0_k$ and $S'^0_i$ is the projection of $S^0_i$ w.r.t. $Y\cap X_i$ for all $i\in\{1,\ldots, k\}$.
+}
 \end{prop}
 
-\paragraph{Further decomposition}
+\subsection{Further decomposition}
 $\mathcal{S}$ has by construction a block-angular structure, and instead of eliminating $Z^0\cup Y\setminus(X_1\cup\ldots\cup X_k)$ immediately, if necessary, we can use further auxiliary variables to postpone ``mixing'' blocks when eliminating the remaining variables. 
 To do so, we collect all subsystems into $k_1$ small groups; we have mostly used groups of size 2, 3 or 1\footnote{``Combining'' a single sybsystem corresponds to substituting a variable with a new variable, but can be done for convenience of notation.}.
 For each group $i$ we do as follows:
@@ -67,8 +69,8 @@ For each group $i$ we do as follows:
 \item Then we project the resultant system, $S^1_i$, w.r.t. the previous, auxiliary $z^0$-variables, while we do keep the newly created $z^1$-variables.
 \end{itemize} 
 Subsequently we can then join the projected $S^1$-systems with the (rephrased) transverse inequalities, $S_\trt{g}^1$, and finally project the last auxiliary variables. Alternatively, we can repeat the step above step until the final projection can be done. 
-
-\paragraph{Tree structure}
+\\\\
+%\paragraph{{Tree structure}}
 Each time we further decompose a system, we use a partitioning of the subsystems $S^l_1, \ldots, S^l_{k_l}$ to create a new level of $k_{l+1}$ subsystems, $S^{l+1}_1,\ldots, S^{l+1}_{k_{l+1}}$. This effectively creates a tree structure of smaller inequality systems, where each node is associated with a subsystem and a set of variables that should be eliminated from the system. 
 Using this tree, an inequality system associated with a node is projected by recursively projecting the systems associated with the children of the node. Further, as expected, projecting the root of the tree constructed from $S$ and $Y$ as explained creates a system equivalent to the projection of $S$ w.r.t. $Y$. See Figure~\ref{fig:decomp2} and the example further below.
 
@@ -90,12 +92,12 @@ Consider the system from the previous example, which was decomposed into the sub
 That is, we construct systems $S^1_1=\{-z^1_{e,1} + z^0_{e,1}+z^0_{e,2} = 0\}\cup \{-z^1_{c,1} + z^0_{c,1}+z^0_{c,2} = 0\}$ and $S^1_2=\{-z^1_{e,2} +z^0_{e,3}+ z^0_{e,4}+z^0_{e,5} = 0\}\cup \{-z^1_{c,2} +z^0_{c,3}+ z^0_{c,4}+z^0_{c,5} = 0\}$, and make the tree structure as in Figure~\ref{fig:decomp2}(a). The rephrased global inequalities are now $S_\trt{g}^1 = \{-wSum + z^1_{e,1} + z^1_{e,2} = 0 \} \cup \{ z^1_{c,1} + z^1_{e,2} \leq 20\}$.   
 %
 The projection of $S$ w.r.t. $Y$ is now made by projecting the root of the tree recursively as shown in Figure~\ref{fig:decomp2}(b). 
-\\
-\\
-Using our previously described projection method, we obtain the projection of $S$ w.r.t. $Y$ by calling \Call{ProjectNode}{root of $T$}, where $T$ is the tree structure constructed from $S$ and $Y$, and \Call{ProjectNode}{} is as below in Algorithm~\ref{alg:decomp}. We note that due to the boundary coarsening this only approximates $\mi{proj}_Y(S)$.
+
+\subsection{Projection via decomposition}
+Using our previously described projection method, we obtain the projection of $S$ w.r.t. $Y$ by calling \Call{ProjectNode}{root of $T$}, where $T$ is the tree structure constructed from $S$ and $Y$, and \Call{ProjectNode}{} is as below in Algorithm~\ref{alg:decomp}. We note that due to the boundary coarsening (elimination of almost redundant inequalities), this only approximates $\mi{proj}_Y(S)$. However, by setting $\epsilon = 0$, the algorithm indeed returns the correct projection.
 
 \begin{algorithm}
-\caption{{Using the FME framework on a decomposed, block-angular structured system.}}
+\caption{{Projecting a block-angular structured system using decomposition.}}
 \label{alg:decomp}
 \begin{algorithmic}
 \Function{ProjectNode}{Node $n$} 
@@ -111,16 +113,18 @@ Using our previously described projection method, we obtain the projection of $S
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
+%
+%\paragraph{{Other block structures} }
 
-\paragraph{Other block structures} 
-Using the decomposition described above, it is of course also possible to project nested block structured problems, i.e. systems that on the top-level can be divided into a global part and a number of local parts that in themselves can be further divided into local parts and a global part, and so on.  
+\noindent Using the decomposition described above, it is of course also possible to project nested block structured problems, i.e. systems that on the top-level can be divided into a global part and a number of local parts that in themselves can be further divided into local parts and a global part, and so on.  
 Other block structured problems such as staircase problems can also be decomposed into a tree structure and projected using the described approach. 
-
-\paragraph{Parallelization}
+\\\\
+%\paragraph{\red{Parallelization}}
 When the system $S$ is decomposed into subsystems in a tree structure as described above, the projection itself can be parallelized by maintaining a queue of not yet projected subsystems whose children have all been projected; this queue thus initially contains all leafs. 
 The members of the queue are then solved independently by multiple solvers in parallel, who also add systems to the queue when the membership condition is met.
 The pseudocode for this is presented below. Besides a system $S$ and a variable set $Y$, each node $n$ is associated with a number, $n_{count}$, corresponding to the number of projected children (initially set to $0$), and a system, $n_{proj}$, corresponding to the projection $\mi{proj}_Y(S)$ when it is done (initially set to $\emptyset$). 
 \vspace{1mm}
+\red{
 \begin{algorithmic}
 \Function{ParallelTreeProjection}{$S$, $Y$}
 	\State Construct  tree structure $T$ from $S$ and $Y$
@@ -147,6 +151,7 @@ The pseudocode for this is presented below. Besides a system $S$ and a variable 
 	\State \Return
 \EndFunction
 \end{algorithmic}	
+}
 \vspace{1mm}
 All workers project a system using the FME framework, which again involves parallel redundancy removal, and thus it is important to only use as many resources (threads) in total as there are available.
 Then, when at some point there are less nodes left to project than there are workers in $W$, the superfluous workers can pass on their resources to the remaining workers.  

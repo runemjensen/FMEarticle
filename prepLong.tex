@@ -1,0 +1,46 @@
+\subsection{Preprocessing}
+Prior to projecting the system we perform some simple preprocessing steps in order to have a smaller system as the starting point. The steps (which can be found in e.g. \cite{brearley75,andersen95,maros})
+are then applied repeatedly in a cycle, as long as ``something happens'' in a cycle, that is, a constraint or variable in $Y$ is removed, a variable is substituted with a value, or a bound of a variable or an (in)equality's left-hand-side is updated.
+%When doing this, variables in $\VAR(S)\setminus Y$ are not removed, and we keep track of any values that they are substituted with. 
+
+The individual preprocessing steps are as follows; details can be found in \cite{MyTechRep}.
+%
+\begin{enumerate} \itemsep0em
+	\item Remove all empty inequalities and unused variables $x\in Y$.
+\setcounter{counterName}{\value{enumi}}
+\end{enumerate}
+For each variable $x$, we maintain an upper and lower bound, $ub_x$ and $lb_x$, which initially is $+\infty$ and $-\infty$, respectively. When the bounds are finite, they are treated as inequalities in the system.
+\begin{enumerate} \itemsep0em
+\setcounter{enumi}{\value{counterName}}
+	\item If $ub_x = lb_x$ for a variable $x\in X$, then substitute $x$ with $lb_x$ in all constraints in $S$. 
+	\item If an inequality $a_x\cdot x \leq b$ belongs to $S$, then remove it from $S$. If $a_x>0$ then update the upper bound for $x$ to $\min\{ub_x,\frac{b}{a_x}\}$, otherwise update the lower bound to $\max\{lb_x,\frac{b}{a_x}\}$.
+For the equality $a\cdot x = b$, both bounds are updated.
+	\item If $\Neg_S(x)=\emptyset$ for an $x\in Y$ (implying that $x$ does not occur in an equality and has no (finite) lower bound) then remove $\Pos_S(x)$ from $S$. If $\Neg_S(x)$ only consist of the inequality defining the lower bound of $x$, $-x\leq -lb_x$, then substitute $x$ with $lb_x$ in all constraints in $S$. Similarly w.r.t. $\Pos_S(x)$. We notice that this is \emph{not} a normal preprocessing step, but corresponds to making a FME on $x$, which changes the feasible area of $S$. 
+\setcounter{counterName}{\value{enumi}}
+\end{enumerate}
+For each inequality we also maintain an upper and lower bound (which potentially is $\pm \infty$) for its left-hand-side. At a feasible point for $S$, the upper bound for the constraint $c$ with left-hand-side $\ve{a}\cdot\ve{x}$ is thus $\mi{ub}_c = \smashoperator[r]{\sum_{x. a_x>0}}a_x\cdot ub_x + \smashoperator[r]{\sum_{x.a_x<0}}a_x\cdot lb_x$. Similarly, $c$'s lower bound is given by $\mi{lb}_c = \smashoperator[r]{\sum_{x.a_x>0}}a_x\cdot lb_x + \smashoperator[r]{\sum_{x.a_x<0}}a_x\cdot ub_x$.
+These bounds might again imply tighter bounds for the variables. 
+\begin{enumerate} \itemsep0em
+\setcounter{enumi}{\value{counterName}}
+	\item If $c$ is an inequality with right-hand-side $b$ and $\mi{ub}_c \leq b$ then $c$ is redundant and removed. If instead $c$ is an equality (and still $\mi{ub}_c \leq b$) then necessarily $\mi{ub}_c = b$, and $c$ is removed from $S$ while all positive (respectively negative) variables in $c$ is replaced with their upper (respectively lower) bound.
+	\item If $c$ is a constraint with right-hand-side $b$, and $\mi{lb}_c \geq b$, then necessarily $\mi{lb}_c = b$, and $c$ is removed from $S$ while all positive (respectively negative) variables in $c$ are replaced with their lower (respectively upper) bound.
+	\item For any variable $x$ used by $c$, if $a_x > 0$ and $\mi{lb}_{c,x}<+\infty$, 
+	where $\mi{lb}_{c,x} = \smashoperator[r]{\sum_{x'.a_{x'}>0, x'\neq x}}a_{x'}\cdot lb_{x'} + \smashoperator[r]{\sum_{x'.a_{x'}<0}}a_{x'}\cdot ub_{x'}$, 
+	then $ub_x$ is updated to $\min\{ub_x, \frac{b-\mathit{lb}_{c,x}}{a_x}\}$. 
+	Similarly, if $a_x < 0$ and $\mi{lb}_{c,x}<+\infty$, then $lb_x$ is updated to $\max\{lb_x, \frac{b-\mathit{lb}_{c,x}}{a_x}\}$.	
+	Updating bounds for constraints with only one variable (step 3) is a special case of this.
+\setcounter{counterName}{\value{enumi}}
+\end{enumerate}	
+%
+Comparing two inequalities syntactically, we can in some cases detect redundancy as described below. All pairs of inequalites are then compared in an efficient manner.
+In the following, let $c$ be an constraint in $S$ with left-hand-side $\ve{a}\cdot \ve{x}$ and right-hand-side $b$, and let $c'$ be another constraint with left-hand-side $\ve{a}'\cdot \ve{x}$ and right-hand-side $b'$. 
+\begin{enumerate} \itemsep0em
+\setcounter{enumi}{\value{counterName}}
+\item 
+If $\ve{a}=\sigma\cdot \ve{a}'$, then $c$ is \emph{linearly dependent} (\cite{lassez93}). $c$ is hence redundant if
+it is an \underline{in}equality, and either $\sigma\geq 0$ and $\sigma\cdot b'\leq b$; or $c'$ is an equality, $\sigma<0$ and $\sigma\cdot b'\leq b$. $c$ is also redundant if both $c$ and $c'$ are equalities and $\sigma\cdot b'\leq b$. 
+It is enough to check if this holds for $\sigma = \frac{c_x}{c'_x}$ for the first variable $x$ used by $c'$.
+\item
+If all variables used in $c$ and $c'$ are non-negative, and there exists a $\sigma\geq 0$ such that $a_i \leq \sigma \cdot a'_i$ for all $i$, while $\sigma\cdot b' \leq b$, then $c$ is \emph{less strict} than $c'$; it is redundant and hence removed. If $c$ is an equality, so must $c'$ be, and hence $c'$ is turned into an equality. 
+This is only required to be tested for specific value of $\sigma$ that depends on whether $c'$ has a variable with a negative coefficient or not; see \cite{MyTechRep}.
+\end{enumerate} 

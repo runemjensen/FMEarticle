@@ -2,7 +2,7 @@
 %\begin{document}
 \section*{Appendix}
 \subsection*{Vessel data}
-The vessel's data is given by the following sets and constants.
+The vessel data is given by the following sets and constants.
 
 \vspace{1mm}
 \noindent
@@ -11,11 +11,11 @@ The vessel's data is given by the following sets and constants.
 \hline\noalign{\smallskip}
 $L$  & Locations. &
 $T$	 & Types of containers.\\ 
-$S$	 & Sections. (Ordered set)&
+$S$	 & Sections (ordered set).&
 $T^\trt{20}\subseteq T$ & Types that are $20'$ long. \\
 $S^\trt{f}, S^\trt{a}\subseteq S$ & Sections fore/aft. &
 $T^\trt{R}\subseteq T$ & Types that are reefers.\\
-$L_s\subseteq L$ & Locations in section $s\in S$ &
+$L_s\subseteq L$ & Locations in section $s\in S$. &
 $\mi{BT}$ & Ballast tanks. \\
 $F$	 & Frames. &
 $B$ & Blocks with constant weight.\\
@@ -36,32 +36,31 @@ It is assumed that if $L_s\neq \emptyset$ then $L_s$ contains all locations that
 \hline\noalign{\smallskip}
 $C_l^\trt{20}$, $C_l^\trt{40}$, $C_l^\trt{TEU}$, $C_l^\trt{RS}$, $C_l^\trt{RC}$, 
 $C_l^\trt{W20}$, $C_l^\trt{W40}\in \mathbb{N}$ & The capacity for each location $l\in L$, w.r.t. $20'$ containers, $40'$ container, TEUs, reefer slots, reefer cells, weight of $20'$ containers, and weight of $40'$ containers, respectively.\\
-$W_\tau, W_b\in \mathbb{R}$ & The weight of a type of container $\tau\in T$, and of a block $b\in B$, respectively. \\
-$A_{\sigma,d}\in \mathbb{R}^+_0$ & The area submerged in water at station $\sigma\in ST$ for some displacement $d$ in a finite set $D$.\\
-$P^\trt{f}_l, P^\trt{a}_l, P^\trt{f}_b, P^\trt{a}_b, P^\trt{f}_t, P^\trt{a}_t\in\mathbb{R}$ & The longitudinal position of the fore and aft endpoint of location $l\in L$, block $b \in B$ and tank $t \in BT$, respectively.\\
+$W^\tau, W_b\in \mathbb{R}$ & The weight of a type of container $\tau\in T$, and of a block $b\in B$, respectively. \\
+$A_{\sigma}\in \mathbb{R}^+_0$ & A table giving the area submerged in water at station $\sigma\in ST$ for a finite set of displacements $D$.\\
+$P^\trt{f}_l, P^\trt{a}_l, P^\trt{f}_b, P^\trt{a}_b, P^\trt{f}_t, P^\trt{a}_t, P^\trt{f}_f \in\mathbb{R}$ & The longitudinal position of the fore and aft endpoint of location $l\in L$, block $b \in B$, and tank $t \in BT$, respectively.\\
 $P_\sigma, P_f\in \mathbb{R}$& The lengthwise position of station $\sigma\in ST$, and of frame $f\in F$, respectively.\\
-$\mi{Max}^\trt{wTotal}$, $\mi{Max}^\trt{t}_b\in \mathbb{R}^+$& Upper bound for the total displacement and for each ballast tank $b\in BT$, respectively.\\
+$\mi{Max}^\trt{w}$, $\mi{Max}^\trt{w}_b\in \mathbb{R}^+$& Upper bound for the total displacement and for each ballast tank $b\in BT$, respectively.\\
 $\mi{Max}^\trt{sf}_f$, $\mi{Min}^\trt{sf}_f$, $\mi{Max}^\trt{bm}_f$, $\mi{Min}^\trt{bm}_f\in\mathbb{R}$ & The upper and lower bounds for the shear force and bending moment at each frame $f\in F$, respectively.\\
 \end{tabular}
-
 
 \subsection*{Output data and vessel model}
 In the Vessel Model, buoyancy data and hydrostatic constraints are translated to sections end points. 
 
-The Vessel Model uses the sets $L$, $S$, $T$, $T^{\trt{20}}, T^\trt{R}$ and $BT$ (given above), while the used variables are summarized in Table~\ref{table:constants}. Our standard model uses the constants $C_s^\trt{20}$, $C_s^\trt{40}$, $C_s^\trt{TEU}$, $C_s^\trt{RS}$, $C_s^\trt{RC}$, 
-$C_s^\trt{W20}$, $C_s^\trt{W40}$, $W_\tau$ and $\mi{Max}^\trt{wTotal}$ (given above) as well as the constant given in Table~\ref{table:constants}. The constants from Table~\ref{table:constants} are calculated from the input data as explained further below.
+The Vessel Stowage Model uses the sets $L$, $S$, $T$, $T^{\trt{20}}, T^\trt{R}$ and $BT$ (given above), while the used variables are summarized in Table~\ref{table:constants}. Our standard model uses the constants $C_l^\trt{20}$, $C_l^\trt{40}$, $C_l^\trt{TEU}$, $C_l^\trt{RS}$, $C_l^\trt{RC}$, 
+$C_l^\trt{W20}$, $C_l^\trt{W40}$, $W_\tau$ and $\mi{Max}^\trt{w}$ (given above) as well as the constant given in Table~\ref{table:constants}. The latter constants (from Table~\ref{table:constants}) are calculated from the input data as explained further below.
 
 Regarding the variables, we note that even though $x_{l,\tau}$ is a number of containers and hence a natural number, we model it as a reel number to ensure that the resulting model is an LP.  
 
 %the for and aft thing - for a middle point, do we sum fore or aft for sf and bm. I think its ok, I might just have defined S^a and S^f generically
-\begin{table}
+\begin{table}[hbtp]
 \centering
 \begin{tabular}{p{3.5cm}p{9cm}}
 \multicolumn{2}{l}{\textbf{Decision variables}}\\
 \hline
 $x_{l,\tau}\in \mathbb{R}^+_0$
 		&Number of containers of each type $\tau\in T$ to be stowed in each location $l\in L$.\\
-$xt_s\in \mathbb{R}^+_0$
+$t_s\in \mathbb{R}^+_0$
 		& The weight of ballast tanks within section $s\in S$.\\
 \\
 \multicolumn{2}{l}{\textbf{Auxilliary variables}}\\

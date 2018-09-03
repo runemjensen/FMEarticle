@@ -3,7 +3,7 @@
 %\begin{document}
 \section{Vessel Model}\label{sec:VMs}
 In this section, we will describe the vessel stowage model (VSM) that is the basis for our projections. The model is adapted from work by Delgado (\cite{AlbertosThesis}). In the following, we will describe the given vessel data and further explain how this information is translated into the VSM.
-The data used as input to the VSMs are real vessel profile files used by a professional loading computer. These vessel profiles have been kindly provided by our industrial partners.
+The data used as input to the VSMs are real vessel profile files used by a professional loading computer. 
 
 Our VSM includes various stowage constraints and further {describes the hydrostatic constraints reasonably accurate while}
 abstracting away much of the unnecessary complexity relating to the physical layout of the vessel that is present in the data. 
@@ -21,7 +21,7 @@ The cargo space of a container vessel is divided into parts called \textit{bays}
 \end{figure}
 
 To define common reference points for cargo-holding structures and hydrostatic constraints, we further define larger \emph{sections} of the vessel and their endpoints. Each of these sections either span a number of succeeding bays, or a part of the ship containing no bays at all.
-See Figure~\ref{fig:sectionEndPoints}. \red{We note that this is \emph{not} part of the data in vessel profile file, but an input we define.} 
+See Figure~\ref{fig:sectionEndPoints}. {Note that this is \emph{not} part of the data in vessel profile file, but an input we define.} 
 
 \begin{figure}[hb]
 	\centering
@@ -31,45 +31,45 @@ See Figure~\ref{fig:sectionEndPoints}. \red{We note that this is \emph{not} part
 \end{figure}
 
 An empty vessel without cargo ballast or equipment is referred to as \emph{lightship}.  The lightship is given in the data by a set of ``blocks'' placed along the vessel. Each block has a given weight that is assumed to be equally distributed along the block.
-
+%
 The cargo itself is described by a container \emph{type}, which is defined by a length (20' or 40')\footnote{45' long containers are also common, but for the sake of simplicity, we only consider 20' and 40' containers in this article.}, whether it is a reefer-container or not, and a weight class (in a discrete set of weights). 
 Besides containers, vessels also carry \emph{ballast tanks} in fixed positions along the vessel that can be filled with water to improve the stability of the vessel.
-\\\\
+
 %\paragraph{Capacities}
 Though containers physically are placed in specific slots, the considered vessel data specifies capacities for each location. These capacities are given in \emph{TEU} (Twenty-foot Equivalent Units), i.e. a standard $20'$ container takes up one TEU, while a $40'$ container takes up two TEU. For each location, the vessel data includes upper bounds for: the total number of TEUs, $20'$ containers, $40'$ containers, reefer slots, reefer cells, plus separate total weight limit for $20'$ and $40'$ containers, respectively. The latter exist, since only $20'$ containers rest on the middle support posts of the stack it is in, while the end posts hold weight of both $20'$ and $40'$ containers. This may lead to different weight capacities of $20'$ and $40'$ containers.
-
-Limits for each ballast tank are likewise given in the input data, as well as a limit for the total displacement, i.e. the weight of the vessel, including ballast water, cargo and the ship itself. 
 %
-\\\\
+Limits for each ballast tank are likewise given in the input data, as well as a limit for the total displacement, i.e. the weight of the vessel, including ballast water, cargo and the ship itself. 
+
 %\paragraph{Stress forces}
 On a vessel, stress forces arise as a result of gravitation acting downwards and buoyancy acting upwards. This results in shear forces and bending moments along the longitudinal axis of the vessel, and limits on these are given for a set of reference points along the vessel called \emph{frames} (see Figure~\ref{fig:vessel}(a)). 
 %
 The buoyancy force comes from the vessel's displacement of water and hence depends on the varying (and irregular) shape of the hull and the displacement of the vessel. The area submerged in water is given at another set of reference points called \emph{stations} for a discrete set of displacement values (see Figure~\ref{fig:vessel}(a)).
 It is the position of these reference points, that do not line up with bay endpoints, which is remedied in the VSM.
-
+%
 Further requirements to ensure the stability of the vessel are imposed in real life and considered eg. in \cite{AlbertosThesis}, but is not considered here.
 \\\\
 %\paragraph{Input Data}
 The vessel structure is described using the sets $L$ (locations), $BT$ (ballast tanks), $B$ (blocks with a constant weight $W_b$ for all $b\in B$), $ST$ (stations) and $F$ (frames). All elements in these sets have a fixed longitudinal position fore and aft ( $P^\trt{f}_e$ and $P^\trt{a}_e$ for all $e\in L\cup BT \cup B \cup ST \cup F$), and for the latter two sets, the fore and aft position coincide. %[For modeling purposes, an (artificial) station and a frame are assumed given at the endpoint of the vessel for which the submerged areas and limits, respectively, are 0.]
 %
-The division of the vessel into sections are described by the sets $S$ (sections), which is divided into sections fore and aft ($S^\trt{f}$ and $S^\trt{a}$), as well as a set $L_s$ for all $s\in S$ (locations in section $s$). A fore and aft position of each $s$ ($P^\trt{f}_s$ and $P^\trt{a}_s$) is implicitly given by the locations in $L_s$.% (Taking the minimum aft-position of the locations in $s$ and the maximum fore-position, respectively, specifies the fore position, $P^\trt{f}_s$, and aft position, $P^\trt{a}_s$, of $s$.
+The division of the vessel into sections is described by the sets $S$ (sections), which is divided into sections fore and aft ($S^\trt{f}$ and $S^\trt{a}$), as well as a set $L_s$ for all $s\in S$ (locations in section $s$). A fore and aft position of each $s$ ($P^\trt{f}_s$ and $P^\trt{a}_s$) is implicitly given by the locations in $L_s$.% (Taking the minimum aft-position of the locations in $s$ and the maximum fore-position, respectively, specifies the fore position, $P^\trt{f}_s$, and aft position, $P^\trt{a}_s$, of $s$.
 
 The cargo is described by the set $T$ (container types) with subsets $T^\trt{20}$ ($20'$ container types -- $T\setminus T^\trt{20}$ hence indicates the set of $40'$ container types) and $T^\trt{R}$ (reefer container types). 
-Further, each container type has a weight, $W^\tau$, associated.
+Further, each container type $\tau \in T$ has a weight, $W^\tau$, associated.
 
 The capacity-limits are given by the constants $C^\trt{TEU}_l$, $C^\trt{20}_l$, $C^\trt{40}_l$, $C^\trt{RS}_l$, $C^\trt{RC}_l$, $C^\trt{W20}_l$, $C^\trt{W40}_l$ for each $l\in L$, and by $\mi{Max}^\trt{w}_b$ for all $b\in BT$, plus $\mi{Max}^\trt{w}$. The limits on the stress forces are given by $\mi{Max}^\trt{sf}_f$, $\mi{Min}^\trt{sf}_f$, $\mi{Max}^\trt{bm}_f$, $\mi{Min}^\trt{bm}_f$ for all $f\in F$. At each station $\sigma\in ST$, the submerged area of the ship at $\sigma$ is given for a discrete set of displacements in the table $A_\sigma$.
 
 \subsection{Vessel Model}
 The input data outlined above is used to construct the VSM described in the following.
 
-\subsubsection{Variables}
+\paragraph{Variables}
 As decision variables we use $x_{l,\tau}$ for all $l\in L$ and $\tau \in T$, which denotes the number of containers of type $\tau$ stowed in location $l$, and $t_s$ for all $s\in S$, which denotes the amount of ballast water in ballast tanks in section $s$. 
 
-As important auxiliary variables, we define $x_\tau = \sum_{l\in L} x_{l,\tau}$ for all $\tau\in T$, the number of containers of type $\tau$ on the vessel in total, disregarding their placements. It is the relationship among these variables that we are actually interested in.  
+As important auxiliary variables, we define $x_\tau = \sum_{l\in L} x_{l,\tau}$ for all $\tau\in T$, the number of containers of type $\tau$ on the vessel in total, disregarding their placements. It is the relationship among these variables that we are actually interested in, since these relationships define the wanted capacity model. Thus, when producing the capacity model from the VSM described in this section, we project all variables but $\set{x_\tau}{\tau \in T}$.  
+
 Another important auxiliary variable is $w_s$, denoting the total weight of section $s$, everything included. Likewise the total weight, $w = \sum_{s\in S}w_s$ is used in hydrostatics constraints (see further below). 
 Other auxiliary variables used to ease notation are mentioned below as necessary.
 
-\subsubsection{Constraints}
+\paragraph{Constraints}
 %\paragraph{Capacity constraints}
 As mentioned above, the data directly contains various capacities (i.e. upper bounds) for containers in each location. For example, for each $l\in L$, the inequality $\sum_{\tau \in T^\trt{20}}x_{l,\tau} + \sum_{t\in T\setminus T^\trt{20}}2\cdot x_{l,\tau}\leq C^\trt{TEU}_l$  describes the total TEU capacity constraint of location $l$, while $\sum_{\tau \in T^\trt{20}}x_{l,\tau}\cdot W^\tau\leq C^\trt{20W}_l$ describes the weight capacity for 20' containers in location $l$.
 

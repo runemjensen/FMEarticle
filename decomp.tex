@@ -2,7 +2,7 @@
 %\begin{document}
 \section{Decomposing block-angular structured system}
 \label{sec:decomp}
-In the following we will describe how the structure of the considered problem can be exploited to make our projection framework perform better on large systems. Detailed pseudocode and proofs can be found in \cite{MyTechRep}. 
+In the following we will describe how the structure of the considered problem can be exploited to make our projection framework scales to large systems. Detailed pseudocode and correctness proofs can be found in \cite{MyTechRep}. 
 
 The considered vessel models have a \emph{(primal) block angular structure} \cite{williams}. That is, the constraint system $S$ can be divided into $k$ local subsystems, $S_1, \ldots, S_k$, using smaller, disjoint sets of variables, $X_1, \ldots, X_k$, and a global system, $S_\trt{g}$, whose constraints ``connect'' the otherwise independent subsystem by using variables from several local subsystems (see Figure~\ref{fig:decomp}). 
 %
@@ -29,22 +29,50 @@ We can then eliminate all the auxiliary $z^0$-variables, $Z^0$, plus the variabl
 
 \begin{figure}[htbp]
 	\centering
-		\includegraphics{figures/recursiveProjectionEs(a).pdf}
+		\includegraphics{figures/blockStructure.pdf}
 	\caption{An illustration of the coefficient matrix for a block-angular constraint system $S$ (non-zero sections coloured blue).}
 	\label{fig:decomp}
 \end{figure}
 
+
 \paragraph{Example}
-As an example, consider the block-structured problem $S$ illustrated in Figure~\ref{fig:decomp}, where $X_i=\{u_i, w_i\}$ for $i\in\{1,2,3,4,5\}$, and $S_\trt{g}=\{e,c\}$ consists of an equality defining the weighted sum, $e: - \mi{wSum} + 1u_1+ 1w_1 + 2u_2+ 2w_2 + 3u_3+ 3w_3 + 4u_4+ 4w_4 + 5u_5+ 5w_5 = 0$, and another inequality limiting the $w$s, $c: w_1 + w_2 + w_3 + w_4 + w_5\leq 20$. Assume that we want to eliminate all variables but $\mi{wSum}$, that is $Y = \bigcup_{i\in\{1,2,3,4,5\}}\{u_i,w_i\}$.
-
-We then create the subsystems $S^0_1, \ldots, S^0_5$ and $S^0_\trt{g}$, where $S^0_i = S_i \cup 
-\{-z^0_{e,i} + i\cdot u_i + i\cdot w_i = 0 \} \cup \{ -z^0_{c,i} + w_i = 0 \}$ for $i\in\{1,\ldots,5\}$, while the rephrased global inequalities are $S_\trt{g}^0 = \{-wSum + z^0_{e,1} + z^0_{e,2} + z^0_{e,3} + z^0_{e,4} + z^0_{e,5} = 0 \} \cup \{ z^0_{c,1} +z^0_{c,2} +z^0_{c,3}+z^0_{c,4}+z^0_{c,5} \leq 20\}$.   
-
-To procure the projection of $S$ w.r.t. $Y$ we can then project $S_i^0$ w.r.t. $\{u_i, w_i\}$ for all $i\in\{1,\ldots,  5\}$, join the projections together with $S^0_\trt{g}$ in the system $\mathcal{S}$, and then project $\mathcal{S}$ w.r.t. $\set{z^0_{c,i}, z^0_{e,i}}{1\leq i\leq 5}$. {$\triangledown$}
-
+As an example, consider the block-structured (in)equality system $S = S_\trt{g} \cup S_1\cup S_2\cup S_3 \cup S_4$ below, which is illustrated in Figure~\ref{fig:decomp}. 
+\small{
+\begin{gather*}
+S_\trt{g}: \left\{ \begin{array}{lrl} e:& -u + x_1 + y_1 + 2 x_2 + 2 y_2 + 3 x_3 + 3 y_3 + 4 x_4 + 4 y_4 &= 0\\
+c:& x_1 + 2 y_1 + 3 x_2 + 4 y_2 + 5x_3 + 6 y_3 + 7x_4 + 8 y_4 &\leq 16\end{array}\right.,\\ 
+S_1: \left\{ \begin{array}{ll}x_1 + y_1 				&\leq 5\\
+															x_1 - 3 y_1 &\leq 1\\
+														4 x_1	+ 2 y_1 	&\leq -1\end{array}\right.,\qquad
+S_2 : \left\{ \begin{array}{ll}  x_2 - 2 y_2 &\leq 2\\
+															 - x_2 - y_2 				&\leq -2\\
+																 y_2 							&\leq 4\end{array}\right.,\qquad
+S_3 : \left\{ \begin{array}{ll}- x_3 + y_3 			&\leq 3\\
+														 - 2 x_3 - y_3 			&\leq -1\\
+																 x_3 						&\leq 4\end{array}\right.,\quad
+S_4 : \left\{ \begin{array}{ll} x_4 +2 y_4 &\leq 8\\
+															- x_4 						&\leq -1\\
+															- y_4 						&\leq -1\end{array}\right..
+\end{gather*}
+}
+\normalsize{
+Assume that we want to eliminate all variables but $u$, which is defined as a weighted sum of the rest of the variables.
+We then define $S_\trt{g}^0, S_1^0, S_2^0, S_3^0$ and $S_0^4$ as below. Then we project each $S_i^0$ w.r.t. $\{x_i, y_i\}$, join the projections together with $S^0_\trt{g}$ in the system $\mathcal{S}$, and then project $\mathcal{S}$ w.r.t. $\{z^0_{e,1}, z^0_{e,2}, z^0_{e,3}, z^0_{e,4}, z^0_{c,1}, z^0_{c,2}, z^0_{c,3}, z^0_{c,4}\}$.}
+\small{
+\begin{gather*}
+S_\trt{g}^0 = \{-u + z_{e,1}^0 + z_{e,2}^0 + z_{e,3}^0 + z_{e,4}^0 = 0, \: 
+z_{c,1}^0 + z_{c,2}^0 + z_{c,3}^0 + z_{c,4}^0 \leq 16\},\\
+S_1^0 = S_1\cup \{-z_{e,1}^0 + x_1 + y_1 = 0,\: -z_{c,1}^0 + x_1 + 2 y_1 = 0 \},\quad
+S_2^0 = S_2\cup \{-z_{e,2}^0 + 2 x_1 + 2 y_1 = 0,\: -z_{c,2}^0 + 3x_2 + 4 y_2 = 0 \},\\
+S_3^0 = S_3\cup \{-z_{e,3}^0 + 3 x_1 + 3 y_1 = 0,\: -z_{c,3}^0 + 5 x_3 + 6y_3 = 0 \},\quad
+S_4^0 = S_4\cup \{-z_{e,4}^0 + 4 x_1 + 4 y_1 = 0,\: -z_{c,4}^0 + 7 x_4 + 8y_4 = 0 \}.
+\end{gather*}
+}
+{$\triangledown$}
+\\\\
 %\paragraph{{Equivalent projections}}
-Comparing the union of the new (unprojected) subsystems, $\mathfrak{S} = S_1^0\cup\ldots\cup S_k^0\cup S_\trt{g}^0$, with the original system $S$ it is clear that
-all we have done is defining auxiliary variables and substituted them in the system. Intuitively, it is therefore clear that eliminating the variables in $Y$ from $S$ is equivalent to eliminating $Y$ and the defined $z^0$-variables from $\mathfrak{S}$. 
+\normalsize{Comparing the union of the new (unprojected) subsystems, $\mathfrak{S} = S_1^0\cup\ldots\cup S_k^0\cup S_\trt{g}^0$, with the original system $S$ it is clear that
+all we have done is defining auxiliary variables and substituted them in the system. Intuitively, it is therefore clear that eliminating the variables in $Y$ from $S$ is equivalent to eliminating $Y$ and the defined $z^0$-variables from $\mathfrak{S}$.}
 
 This, in turn, is equivalent to projecting the subsystems $S^0_i$ separately w.r.t. $X_i\cap Y$, combining the resulting systems with $S^0_\trt{g}$, and then eliminate the $z^0$-variables and the remaining $Y$-variables: % The intuition behind this is, as follows: 
 %
@@ -76,7 +104,7 @@ Using this tree, an inequality system associated with a node is projected by rec
 
 \begin{figure}
 	\centering
-		\includegraphics{figures/recursiveProjectionEs(b).pdf}
+		\includegraphics{figures/Example3.pdf}
 	\caption{(a) A system $S$ decomposed into a tree structure of subsystems. (b) Recursive projection of the tree-structure in (a).}
 	\label{fig:decomp2}
 \end{figure}
@@ -88,10 +116,13 @@ The projection of the system associated with the root of the tree constructed fr
 \end{prop}
 
 \paragraph{Example}
-Consider the system from the previous example, which was decomposed into the subsystems $S^0_1, \ldots, S^0_5$ and $S^0_\trt{g}$ (Figure~\ref{fig:decomp}). Instead of projecting these subsystems as described in the previous example, we insert an additional level in the decomposition. We choose to group the five subsystems into two groups, namely $\{S^0_1, S^0_2\}$ and $\{S^0_3, S^0_4, S^0_5\}$. 
-That is, we construct systems $S^1_1=\{-z^1_{e,1} + z^0_{e,1}+z^0_{e,2} = 0\}\cup \{-z^1_{c,1} + z^0_{c,1}+z^0_{c,2} = 0\}$ and $S^1_2=\{-z^1_{e,2} +z^0_{e,3}+ z^0_{e,4}+z^0_{e,5} = 0\}\cup \{-z^1_{c,2} +z^0_{c,3}+ z^0_{c,4}+z^0_{c,5} = 0\}$, and make the tree structure as in Figure~\ref{fig:decomp2}(a). The rephrased global inequalities are now $S_\trt{g}^1 = \{-wSum + z^1_{e,1} + z^1_{e,2} = 0 \} \cup \{ z^1_{c,1} + z^1_{e,2} \leq 20\}$.   
-%
-The projection of $S$ w.r.t. $Y$ is now made by projecting the root of the tree recursively as shown in Figure~\ref{fig:decomp2}(b). 
+Consider the system from the previous example, which was decomposed into the subsystems $S^0_1, S_2^0, S_3^0, S^0_4$ and $S^0_\trt{g}$. Instead of projecting these subsystems as described in the previous example, we insert an additional level in the decomposition. We group the four subsystems into two groups, $\{S^0_1, S^0_2\}$ and $\{S^0_3, S^0_4\}$, and construct the tree structure in Figure~\ref{fig:decomp2}(a), where 
+\small{\begin{gather*}
+S_\trt{g}^1 = \{-u + z^1_{e,1} + z^1_{e,2} = 0,\: z^1_{c,1} + z^1_{c,2} \leq 16 \},\\   
+S^1_1=\{-z^1_{e,1} + z^0_{e,1} + z^0_{e,2} = 0,\: -z^1_{c,1} + z^0_{c,1} + z^0_{c,2} = 0\}, 
+\quad S^1_2=\{-z^1_{e,2} +z^0_{e,3}+ z^0_{e,4} = 0,\: -z^1_{c,2} +z^0_{c,3}+ z^0_{c,4} = 0\}. 
+\end{gather*}}
+\normalsize{The projection of $S$ w.r.t. $\{x_1,y_1,x_2,y_2,x_3,y_3,x_4,y_4\}$ is now made by projecting the root of the tree recursively as shown in Figure~\ref{fig:decomp2}(b).} {$\triangledown$}
 
 \subsection{Projection via decomposition}
 Using our previously described projection method, we obtain the projection of $S$ w.r.t. $Y$ by calling \Call{ProjectNode}{root of $T$}, where $T$ is the tree structure constructed from $S$ and $Y$, and \Call{ProjectNode}{} is as below in Algorithm~\ref{alg:decomp}. We note that due to the boundary coarsening (elimination of almost redundant inequalities), this only approximates $\mi{proj}_Y(S)$. However, by setting $\epsilon = 0$, the algorithm indeed returns the correct projection.
@@ -124,7 +155,7 @@ When the system $S$ is decomposed into subsystems in a tree structure as describ
 The members of the queue are then solved independently by multiple solvers in parallel, who also add systems to the queue when the membership condition is met.
 The pseudocode for this is presented below. Besides a system $S$ and a variable set $Y$, each node $n$ is associated with a number, $n_{count}$, corresponding to the number of projected children (initially set to $0$), and a system, $n_{proj}$, corresponding to the projection $\mi{proj}_Y(S)$ when it is done (initially set to $\emptyset$). 
 \vspace{1mm}
-\red{
+
 \begin{algorithmic}
 \Function{ParallelTreeProjection}{$S$, $Y$}
 	\State Construct  tree structure $T$ from $S$ and $Y$
@@ -144,14 +175,14 @@ The pseudocode for this is presented below. Besides a system $S$ and a variable 
 	\State $(S',Y')\gets$ the system and the variable set associated with $n$
 	\State $S'\gets S'\cup_{m\in \mi{children}(n)} m_{proj}$ 
 	\State $n_{proj}\gets$ \Call{Project}{$S'$,$Y'$} \Comment Algorithm~\ref{alg:FMEF}
-	\State Increase $\mi{parent}(n)_{count}$ by one
+	\State $\mi{parent}(n)_{count} \gets \mi{parent}(n)_{count} +1$
 	\If{$\mi{parent}(n)_{count} = |\mi{children}(\mi{parent}(n))|$}
 		\State Add $\mi{parent}(n)$ to $Q$
 	\EndIf
 	\State \Return
 \EndFunction
 \end{algorithmic}	
-}
+
 \vspace{1mm}
 All workers project a system using the FME framework, which again involves parallel redundancy removal, and thus it is important to only use as many resources (threads) in total as there are available.
 Then, when at some point there are less nodes left to project than there are workers in $W$, the superfluous workers can pass on their resources to the remaining workers.  

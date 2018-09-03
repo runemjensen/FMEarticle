@@ -12,7 +12,7 @@ An equality is redundant iff both corresponding inequalities are redundant.
 If the constraint $c$ is \emph{not} redundant, it is called \emph{non-redundant} or binding.
 
 %\paragraph{Projection}
-As described, the feasible area of $S$ describes the combination of values for the variables in $\VAR(S)$ that satisfy all constraints in $S$. However, there are some variables $Y\subseteq \VAR(S)$ whose value in a feasible point we are not interested in; we just want to know that a satisfying value exists. This information is captured by the \emph{projection} of the feasible area of $S$ w.r.t. $Y$, $\mi{proj}_YS\in\mathbb{R}^{|\VAR(S)\setminus Y|}$. This is the largest set consisting of values for $\VAR(S)\setminus Y$ that can be extended with values for $Y$ such that all constraints in $S$ are satisfied (see Figure~\ref{fig:proj}). 
+As described above, the feasible area of $S$ is the combination of values for the variables in $\VAR(S)$ that satisfy all constraints in $S$. However, we assume that there are some variables $Y\subseteq \VAR(S)$ whose value in a feasible point we are not interested in; we just want to know that a satisfying value exists. This information is captured by the \emph{projection} of the feasible area of $S$ w.r.t. $Y$, $\mi{proj}_YS\in\mathbb{R}^{|\VAR(S)\setminus Y|}$. This is the largest set consisting of values for $\VAR(S)\setminus Y$ that can be extended with values for $Y$ such that all constraints in $S$ are satisfied (see Figure~\ref{fig:proj}). 
 
 \begin{figure}
 	\centering
@@ -25,9 +25,7 @@ The projection of a system $S$ is a set of points in Euclidian space, and it is 
 
 %\paragraph{A note on $\VAR(S)$}
 In this paper, we are mainly interested in the original system $S$ and its projection $S'$, while the associated feasible areas of $S$ and $S'$ are the ``mediator'' between the two systems. 
-However, since the feasible area of a system is just a set of points in a multi-dimensional Euclidian space, the number and the order of the variables are important and needs to be given (explicitly or implicitly). 
-%
-Though, the inequality $c:a_1x_1\leq b$ can be considered both as an inequality over the set $\{x_1\}$ as well as over any set $X$ where $x_1\in X$, and we will not specify $VAR(S')$ formally for every considered constraint system $S$.
+However, since the feasible area of a system is just a set of points in a multi-dimensional Euclidian space, the number and the order of the variables are important. However, to avoid unnecessarily heavy notation, in this paper we do not specify $VAR(S')$ formally for every considered constraint system $S$.
 Intuitively, we just make sure that the dimensions (and order of variables) ``match''. For example, when two systems $T$ and $T'$ are joined to form another system $T''$, we consider $T$ and $T'$ as constraints over the same variable set, $VAR(T'')=var(T)\cup var(T')$.
 A more stringent exposition keeping track of the variable sets and ordering can be found in \cite{MyTechRep}.
 %\end{document}

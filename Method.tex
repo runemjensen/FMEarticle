@@ -2,13 +2,13 @@
 \newcounter{counterName}
 %\begin{document}
 \section{Method}\label{sec:methods}
-We have developed a framework based on Fourier-Motzkin-elimination for calculating the projection of the constraint system $S$ w.r.t. $Y$, and it %/for eliminating the variables $Y4 from the constraint system $S$. 
-consists of several sub-procedures. The methods for projecting any (not necessarily structured) constraint system are described further below in this section, while the decomposition used on block-angular structured problems will be described in the section following this.
+We have developed a framework based on Fourier-Motzkin-elimination for calculating the projection of the constraint system $S$ w.r.t. $Y$. It %/for eliminating the variables $Y4 from the constraint system $S$. 
+consists of several sub-procedures. The methods for projecting any (not necessarily structured) constraint system are described further below in this section, while the decomposition used on block-angular structured problems will be described in the next section.
 
 \subsection{Projection procedure}
-Overall, we begin by preprocessing the constraint system, i.e. we reduce it by removing easily identifiable redundant constraints and assign necessary bounds and values to variables.
-Then we use the equalities in the reduced system to isolate variables from $Y$ and substitute in the rest of the system. This clearly eliminates variables from the system, and we refer to it as \emph{Gauss-elimination}.  
-Subsequently, we successively eliminate one variable from $Y$ using Fourier-Motzkin elimination and remove redundant inequalities from the system afterward, until no more variables remain to be eliminated. Eliminating a variable from the system causes some of its constraints to be removed while others new inequalities are added. All of the {staying} constraints are non-redundant, and hence we only check the added inequalities for redundancy. 
+Overall, we begin by preprocessing the constraint system, i.e. we reduce it by removing easily identifiable redundant constraints and assign necessary bounds and values to variables (e.g. \cite{brearley75,andersen95,maros}).
+Then we use the equalities in the reduced system to isolate variables from $Y$ and substitute in the rest of the system. This eliminates variables from the system, and we refer to it as \emph{Gauss-elimination} (e.g. \cite{duffin74,simon05}).  
+Subsequently, we successively eliminate one variable from $Y$ using Fourier-Motzkin elimination and remove redundant inequalities from the system afterwards, until no more variables remain to be eliminated. Eliminating a variable from the system causes some of its constraints to be removed while new inequalities are added. Only the added inequalities are checked for redundancy since the remaining constraints have already have been checked previously and does not later become redundant. 
 
 At the top-level, the pseudocode for our projection method is thus as described in the pseudocode below in Algorithm~\ref{alg:FMEF}. 
 
@@ -31,9 +31,9 @@ At the top-level, the pseudocode for our projection method is thus as described 
 Each sub-procedure in this algorithm is detailed further below. We start with the methods for variable elimination, before we describe the redundancy removal and finally the preprocessing step.
 
 \subsection{Variable eliminations}
-Naturally, the goal of our projection framework is projection, and we will start by describing the two types of eliminations used, namely Fourier-Motzkin-elimination and Gauss-elimination. 
+We first describe the two types of eliminations used, namely Fourier-Motzkin-elimination and Gauss-elimination. 
 \subsubsection{Fourier-Motzkin-elimination}
-Fourier-Motzkin elimination (FME) is a classical algorithm for producing the projection of a set of variables from an inequality system, i.e. a constraint system with no equalities.
+Fourier-Motzkin Elimination (FME) is a classical algorithm for producing the projection of a set of variables from an inequality system, i.e. a constraint system with no equalities.
 The method successively eliminates one variable $x\in Y$ until all required variables have been eliminated.  
 %(see e.g. \cite{imbert93} or \cite{ziegler95}).
 
@@ -44,30 +44,28 @@ A new system $S'$ is then created, which consists of $\mi{Zero}_S(x)$, together 
 i_{p,n,x}: -a'_x\cdot \ve{a}\cdot\ve{x} + a_x\cdot \ve{a}'\cdot\ve{x} \leq -a'_x\cdot b + a_x\cdot b'.
 \]
 By construction, the coefficient for $x$ in $i_{p,n,x}$ is zero, and the resulting system $S' = \mi{Zero}_S(x) \cup\\
-\set{i_{p,n,x}}{(p,n)\in \Pos_S(x)\times Neg_S(x)}$ is the projection of $S$ w.r.t. $\{x\}$ (see \cite{MyTechRep}). %Clearly, $S'$ does not depend on $x$ since no constraint in $S'$ uses $x$.
+\set{i_{p,n,x}}{(p,n)\in \Pos_S(x)\times Neg_S(x)}$ is the projection of $S$ w.r.t. $\{x\}$ \cite{Martin99}. %Clearly, $S'$ does not depend on $x$ since no constraint in $S'$ uses $x$.
 
-The order in which variables are eliminated naturally influences the size of the intermediary inequality systems. We have chosen to use the greedy heuristic \red{that minimizes the number of new inequalities in the immediately next system \cite{duffin74}}, which is the most commonly used heuristic. It is easily calculated from the current system as the variable $x\in Y$ that minimizes $|\Pos_S(x)||\Neg_S(x)| - |\Pos_S(x)|-|\Neg_S(x)|$. 
+The order in which variables are eliminated naturally influences the size of the intermediary inequality systems. We have chosen to use the greedy heuristic {that minimizes the number of new inequalities in the immediately next system \cite{duffin74}}, which is the most commonly used heuristic. It is easily calculated from the current system as the variable $x\in Y$ that minimizes $|\Pos_S(x)||\Neg_S(x)| - |\Pos_S(x)|-|\Neg_S(x)|$. 
 
 
-It is apparent that in the worst case scenario where $|\Pos_S(x)| = |\Neg_S(x)| = \frac{|S|}{2}$ for all $x\in Y$, the number of inequalities in the created system $S'$ is $\frac{1}{4}|S|^2$, which implies that (both time and space) complexity is double-exponential. For a large, dense system, the growth will be substantial, which prohibits it from use for practical purposes \emph{if} the added inequalities are non-redundant or the non-redundant inequalities are not removed ({see e.g. \cite{lassez93} and \cite{lukatskii08}}). It should, however, also be emphasized that not all inequalities in the succeeding system are necessarily non-redundant; in fact, the number of non-redundant inequalities will at most grow exponentially \cite{monniaux10}.
+In the worst case scenario where $|\Pos_S(x)| = |\Neg_S(x)| = \frac{|S|}{2}$ for all $x\in Y$, the number of inequalities in the created system $S'$ is $\frac{1}{4}|S|^2$, which implies that (both time and space) complexity is double-exponential. For a large, dense system, the growth will be substantial, which prohibits it from use for practical purposes \emph{if} the added inequalities are non-redundant or the non-redundant inequalities are not removed ({see e.g. \cite{lassez93} and \cite{lukatskii08}}). It should, however, also be emphasized that not all inequalities in the succeeding system are necessarily non-redundant; in fact, the number of non-redundant inequalities will at most grow exponentially \cite{monniaux10}.
 
 \subsubsection{Gauss-elimination}
-Equalities in a constraint system can be treated as two inequalities when doing FME as described above. However, an equality $e$ can also be used to isolate a variable $x\in Y$ which can then be substituted in all other constraints in $S$; in this paper, this is referred to as Gauss-elimination of the variable $x$ using $e$. This also eliminates $x$ from the system and does not cause the same combinatorial explosion of inequalities as FME may do. 
+Equalities in a constraint system can be treated as two inequalities when doing FME as described above. However, an equality $e$ can also be used to isolate a variable $x\in Y$ which can then be substituted in all other constraints in $S$; in this paper, this is referred to as Gauss-elimination of the variable $x$ using $e$. This also eliminates $x$ from the system and does not cause the same combinatorial explosion of inequalities as FME may do (e.g., \cite{duffin74,simon05}). 
 
-Before performing FME we therefore do as many Gauss-elimination of variables in $Y$ as possible. This is also done in e.g. \cite{simon05}.
+Before performing FME we therefore do as many Gauss-elimination of variables in $Y$ as possible.
 %
 To avoid density, when the system $S$ contains several equalities, we first choose the variable $x$ (used in any equality) that is used the fewest times in total in $S$. We then choose the equation $e$ among those using $x$ that uses the fewest variables, and do Gauss-elimination of $x$ using $e$. 
 This is then repeated until there are no more equalities using variables from $Y$.
  
 \subsection{Redundancy removal}
-%\paragraph{Using optimization software}
-%As mentioned, an inequality in $S$ is redundant iff its left-hand-side can never exceed its right-hand-side when the values are restricted by all the other constraints of $S$. 
 To detect redundancy, we examine each inequality $c: \ve{a}\cdot \ve{x}\leq b$ in turn and remove it from the system if $\max \ve{a}\cdot \ve{x}$ subject to $S\setminus\{c\}$ is less than or equal to $b$. The property is checked using the optimization software CPLEX. Though equalities could be examined this way too, we only examines and remove \underline{in}equalities, since we want to keep the equalities for use in Gauss-elimination.
 
 Not all inequalities have to be examined, though. When removing redundancy from $S' = \mi{proj}_{\{x\}}S$ we do not need to check inequalities in $\mi{Zero}_S(x)$; if they were non-redundant before the elimination, they will be non-redundant after.
 
 \subsubsection{Parallel redundancy checking}
-For large systems, checking all constraints for redundancy is very time-consuming. We have therefore implemented a method for redundancy removal that uses several threads in parallel. 
+For large systems, checking all constraints for redundancy is time-consuming. We have therefore implemented a method for redundancy removal that uses several threads in parallel. 
 
 The method uses a manager to keep track of $k>0$ individual workers who do the actual redundancy checking.
 The manager assigns a different inequality to each of the workers, who in parallel each check if their own inequality is redundant w.r.t. their own copy of $S$. When each worker is done, it reports the result back to the manager, and it gets a new inequality to check.  
@@ -75,7 +73,7 @@ If the reported inequality was redundant, the other workers are notified and the
 
 The manager collects a set containing all the reported redundant inequalities, and when all inequalities are checked, these inequalities can then be removed from the system.
 
-For the method to work correctly, it is important that $S$ contains no two constraints defining the same halfspace, and such easily detectable redundancies are removed prior to the redundancy removal.
+For the method to work correctly, it is important that $S$ contains no two constraints defining the same halfspace. Such easily detectable redundancies are removed prior to the redundancy removal. We notice that rational numbers are used in the implementation to avid rounding errors. 
 
 \subsubsection{Boundary coarsening} 
 Several of the constants in the data used for our vessel models are results of various approximations and hence the boundary of the feasible area is not exact. Coarsening the boundary is therefore permissible, and hence we will also remove inequalities that are \emph{``almost redundant''}. An inequality $c: \ve{a}\cdot\ve{x}\leq b$ is almost redundant if $\max \ve{a}\cdot\ve{x}$  subject to $S\setminus\{c\}$ is less or equal to $b + \epsilon\cdot |b|$ for a small $\epsilon$, see Figure~\ref{fig:almostRedundant}; for our experiments we have used $\epsilon = 0.02$. If $b=0$, we instead require the maximum to be smaller than a given $\epsilon'$. 
@@ -89,9 +87,9 @@ Several of the constants in the data used for our vessel models are results of v
 
 Thus, instead of only collecting a set of redundant inequalities, the manager also collects a set of almost redundant inequalities; the property is checked by the workers simultaneously with the ordinary redundancy check. After the parallel redundancy check, \emph{one} worker then goes through all the almost redundant inequalities one by one and removes the ones that are still almost redundant. The almost redundant inequalities found this way is then removed from the system $S$.  
 
-Almost redundant inequalities can \emph{not} be removed in parallel. Otherwise, in a situation as in Figure~\ref{fig:almostRedundant}, both $c$ and $c'$ could simultaneously be found almost redundant by two different workers, causing them both to be eliminated. When removing almost redundant inequalities sequentially, both inequalities would be checked again, but only the one examined first would be removed.
+Notice that almost redundant inequalities can \emph{not} be removed in parallel. Otherwise, in a situation as in Figure~\ref{fig:almostRedundant}, both $c$ and $c'$ could simultaneously be found almost redundant by two different workers, causing them both to be eliminated. When removing almost redundant inequalities sequentially, both inequalities would be checked again, but only the one examined first would be removed.
 
-A method for coarsening the boundary of the feasible area that relies on removing almost redundant inequalities are used in \cite{lukatskii08} and \cite{shapot12} too, though the approach is different.
+Method for coarsening the boundary of the feasible area that relies on removing almost redundant inequalities are also used in \cite{lukatskii08} and \cite{shapot12}, though their approaches is different.
 
 \input{prep}
 %\input{prepLong}

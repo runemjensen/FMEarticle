@@ -7,32 +7,32 @@
 \maketitle
 
 \section{Introduction}
-%\paragraph{Liner shipping}
+%Liner shipping
 Container shipping is a central element in the clockwork of global trade, and it is even believed to be more important for globalization than freer markets \cite{EC13}. A container liner shipping company operates a set of container vessels which sail on closed loop services with fixed schedules. These services connect major trade regions like Asia and Europe, and the liner shipping business is focused on utilizing the cargo capacity in their service network. Unused capacity constitute a loss and the competition is fierce with a profit margin of just a few percent.  
 
-To avoid unused capacity, it is central for a liner shipping company to be able to estimate the residual capacity of a partially loaded container vessel. However, unlike e.g. an airplane, where the number of empty seats usually equals its free passenger capacity, it is hard to determine whether an empty container slot in a container vessel can be filled.   
+To maximize utilization of capacity, it is central for a liner shipping company to be able to estimate the residual capacity of a partially loaded container vessel. However, unlike e.g. an airplane, where the number of empty seats usually equals its free passenger capacity, it is hard to determine whether an empty container slot in a container vessel can be filled.   
 For example, the weight capacity of the container stack of the slot or the stack's lashing gear may already be exhausted. 
 Similarly, placing a container in the slot may break stress limits such as torsion moment and shear forces or cause the vessel to become unstable.
 Further, placing a container in the slot on top of containers that must be discharged in the next port of call may obstruct the discharge of these or assign too many moves to the crane working on the stack in the port of discharge. 
 Additionally,  
-it may be impossible to place a specific \emph{type} of container in a slot. This may be due to rules regarding separation of dangerous goods, or because of stacking rules that e.g. disallow 20' long containers to be stacked on top of 40' long containers. 
+it may be impossible to place a specific \emph{type} of container in a slot. This may be due to rules regarding separation of dangerous goods, or because of stacking rules that e.g. disallow $20'$ long containers to be stacked on top of $40'$ long containers. 
 As a result, the various stowage rules interact to restrict the permitted cargo, and the residual capacity is  effectively a function of the composition of the different types of containers to be loaded.
 Often it is only the stowage planning experts of a service that can determine the free capacity of a vessel accurately, and even they may sometimes have to manually construct a stowage condition of the vessel to be able to express the residual capacity in terms of this trade-off between the different container types to load.
 
-%\paragraph{Usage of capacity models}
+%Usage of capacity models
 Accurate capacity estimates are, however, not only important in stowage 
 for securing high utilization of the vessels,
 it is also paramount for many other functions in a liner shipping company. These include: {\em uptake management} that control the sale of cargo bookings such as to fill the vessels with profitable cargo; {\em capacity management} that route cargo through the service network; {\em network management} that makes changes to the service network; and {\em fleet management} that charters and buys vessels for the service network and reposition vessels between closing and opening services.  
 %
 Decision makers in these functions seldom have deep stowage insight and traditionally regard vessel capacity in terms of maximum volume, maximum weight, and maximum number of reefer containers (refrigerated containers). In order to determine vessel capacity accurately they need to consult the stowage team, and since this is resource and time consuming, they often act on insufficient information leading to sub-optimal decisions in these higher order functions.  
 
-%\paragraph{Stowage models as capacity models}
+%Stowage models as capacity models
 Previous work on stowage planning optimization (e.g., \cite{roach00,kimkang02,ambrosino04,low09,delgado09,pacino12}) has contributed frameworks for automated stowage planning, and recently, linear stowage planning models were shown to scale to large container vessels (\cite{pacino11,AlbertosThesis}). Since these models define the set of legal stowage conditions, they can be used to compute the residual capacity of a container vessel as a result of the interaction between the different types of containers to load. In other words, they embed an accurate capacity model. 
 
 However, the use of these stowage models as capacity models is limited due to their size. Since a stowage model not only models the capacity of a vessel as a function of the different container types to load but also describes the position of the containers on the vessel, it may contain tens of thousands of constraints and variables and take long time to solve. This is a problem if the stowage model is to be used as a capacity model in uptake-, capacity-, fleet-, and network management, since these tasks often require several hundred capacity models to be solved simultaneously. For example, the task in uptake management of maximizing uptake over a set of voyages, requires us to associate a capacity model with each individual leg of the voyages and then optimize the resulting model.  
 \\\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\paragraph{Our contribution}
+%Our contribution
 In this article, we present a method to calculate reasonably sized capacity models automatically from linear models based on previous research on stowage optimization. The basic idea is to abstract away the information about the containers' positions so that the resulting model only depends on variables denoting the total amount of each possible type of containers, making it a capacity model. %{The derived capacity models are valid in the sense that each feasible solution in the capacity model is associated with a feasible solution in the stowage model it is derived from, even though the capacity model has no information about the place at which the containers are stowed.}
 
 Inspired by previous work in constraint programming (e.g., \cite{lassez90}) and software verification (e.g., \cite{benoy05}), we do this by projecting container position variables out of the mentioned stowage models using a framework based on Fourier-Motzkin Elimination (FME). 
@@ -42,22 +42,280 @@ Our main contribution is a novel decomposition method that takes advantage of bl
 and the framework includes preprocessing of the constraint system including removal of less strict inequalities.
 The block-angular structure is frequent for linear models, and the considered stowage models have this structure, too. The decomposition can therefore be applied when projecting stowage models to obtain capacity models as well as in many other cases.  
 
-%\paragraph{Multi-commodity flow}
+%Multi-commodity flow
 It is not only for stowage models that it is meaningful to eliminate variables irrelevant for an analysis of a model at a ``higher level''. Consider e.g. a multi-commodity flow graph, where commodities flow through the graph from sources to sinks, and each edge have limits for each commodity as well as a joint limit. In a scenario where the supply and demand of each commodity is not fixed it could be of interest to know how the amount of each commodity at the sinks depends on the amount of the commodities at the sources. For this purpose, the amount of each commodity that flows at each edge of the graph is irrelevant, and to get a description of the direct relationship between the inflow-variables and the outflow-variables, the other variables should be eliminated from the system describing the multi-commodity flow problem.
 Multi-commodity flow problems also have a block-angular structure, so our framework applies to these problems as well. To that end, as an example we have examined a multi-commodity flow problem as described above. % and found a speed-up of the projection process similar to the one seen for capacity models. 
 %In general, the block-angular structure is frequently found in linear models, and our framework is therefore expected to be of use for projection of complex problems in other areas than just for capacity models.
-\\
-\\
-%\paragraph{Results}
+\\\\
+%Results
 \noindent A drawback of FME is that for each variable projected, the number of constraints in the resulting system can increase quadratically, leading to a theoretical double exponential complexity in the number of variables to project. However, our experimental evaluation of our FME framework on stowage models shows that almost all constraints added by FME are redundant or negligible, and can accordingly be removed. 
 
 Our experiments likewise show that for complex systems, the decomposition method reduce the size of the intermediary systems produced by FME, causing less time to be needed for removing redundant constraints, which again speeds up the projection process significantly. A similar speed-up of the projection is found when projecting the considered multi-commodity flow problem. %This speed-up is essential for the projection of the more complex models, since otherwise the projection times out after 65 hours having only projected a fraction of the required variables.
 
 The results likewise show that the number of constraints and non-zeros in the resulting capacity models typically are reduced by an order of magnitude compared to their corresponding stowage models. Moreover, for the models that include hydrostatic constraints, the resulting model can be solved 20-35 times faster than their stowage models with only a negligible loss in accuracy. Although it can take several hours of CPU time to derive a capacity model, this only has to be done one time for a vessel class, and in this way, our FME framework performs an off-line computation that factors out time when applying the capacity models as sub-models for uptake-, capacity-, fleet-, and network optimization.
+\\\\
+%Structure of article
+This article is organized as follows. We start in Section~\ref{sec:VMs} by presenting the Vessel Stowage Models (VSMs) that will later be projected to the wanted capacity models. In Section~\ref{sec:defs} we then introduce the required definitions and notation necessary for describing the projection method. This is followed by Section~\ref{sec:methods} that outlines the methods used in our FME framework. Subsequently, in Section~\ref{sec:decomp}, we detail how block-angular problems are decomposed, after which our experimental results follows in Section~\ref{sec:results}. Finally, Section~\ref{sec:concl} concludes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Vessel Stowage Model}\label{sec:VMs}
+In this section, we will describe the vessel stowage model (VSM), which will be projected to obtain the wanted stowage model. The model is adapted from work by Delgado (\cite{AlbertosThesis}). In the following, we will describe the given vessel data and further explain how this information is translated into the VSM.
+The data used as input to the VSMs are real vessel profile files used by a professional loading computer. 
+
+Our VSM includes various stowage constraints and further describes the hydrostatic constraints reasonably accurate while abstracting away much of the unnecessary complexity relating to the physical layout of the vessel that is present in the data. 
+More specifically, the buoyancy data used in hydrostatic calculations are given at a set of points along the vessel (stations), while hydrostatic constraints are given in relation to another set of points (frames), and neither of these coincide with the position of the structures holding the cargo or the ballast tanks (see Figure~\ref{fig:vessel}(a)). The measure points are aligned in the VSM (see Figure~\ref{fig:sectionEndPoints}), and calculations for the hydrostatic constraints are simplified.
+
+\subsection{Vessel description}\label{sec:vessel}
+The cargo space of a container vessel is divided into parts called \textit{bays} that each consists of a grid of \emph{cells}. Each cell is divided into two \emph{slots} and can accordingly hold one standard $40'$ container or two $20'$ containers. Some cells have power plugs allowing for \emph{reefer} containers to be refrigerated as required. Each bay is divided into three or four parts called \textit{locations}, at which level the vessel's capacities are given. See Figure~\ref{fig:vessel}.
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics{figures/vessel3.pdf}
+	\caption{Vessel structure and reference points seen (a) on a longitudinal intersection and (b) on a transversal intersection.}
+	\label{fig:vessel}
+\end{figure}
+
+To define common reference points for cargo-holding structures and hydrostatic constraints, we further define larger \emph{sections} of the vessel and their endpoints. Each of these sections either span a number of succeeding bays, or a part of the ship containing no bays at all.
+See Figure~\ref{fig:sectionEndPoints}. Note that this is \emph{not} part of the data in vessel profile file, but an input we define.
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics{figures/sectionEndPoints.pdf}
+	\caption{Sections on a vessel. Their endpoints are used as common reference points for cargo-holding structures and hydrostatic constraints in the VSM.}
+	\label{fig:sectionEndPoints}
+\end{figure}
+
+An empty vessel without cargo, ballast or equipment is referred to as \emph{lightship}.  The lightship is given in the data by a set of ``blocks'' placed along the vessel. Each block has a given weight that is assumed to be equally distributed along the block.
+%
+The cargo itself is described by a container \emph{type}, which is defined by a length ($20'$ or $40'$)\footnote{$45'$ long containers are also common, but for the sake of simplicity, we only consider $20'$ and $40'$ containers in this article.}, whether it is a reefer-container or not, and a weight class (in a discrete set of weights). 
+Besides containers, vessels also carry \emph{ballast tanks} in fixed positions along the vessel that can be filled with water to improve the stability of the vessel.
+
+%\paragraph{Capacities}
+Though containers physically are placed in specific slots, the considered vessel data specifies capacities for each location. These capacities are given in \emph{TEU} (Twenty-foot Equivalent Units), i.e. a standard $20'$ container takes up one TEU, while a $40'$ container takes up two TEU. For each location, the vessel data includes upper bounds for: the total number of TEUs, $20'$ containers, $40'$ containers, reefer slots, reefer cells, plus separate total weight limit for $20'$ and $40'$ containers, respectively. The latter exist, since only $20'$ containers rest on the middle support posts of the stack it is in, while the end posts hold weight of both $20'$ and $40'$ containers. This may lead to different weight capacities of $20'$ and $40'$ containers.
+%
+Limits for each ballast tank are likewise given in the input data, as well as a limit for the total displacement, i.e. the weight of the vessel, including ballast water, cargo and the ship itself. 
+
+%\paragraph{Stress forces}
+On a vessel, stress forces arise as a result of gravitation acting downwards and buoyancy acting upwards. This results in shear forces and bending moments along the longitudinal axis of the vessel, and limits on these are given for a set of reference points along the vessel called \emph{frames} (see Figure~\ref{fig:vessel}(a)). 
+%
+The buoyancy force comes from the vessel's displacement of water and hence depends on the varying (and irregular) shape of the hull and the displacement of the vessel. The area submerged in water is given at another set of reference points called \emph{stations} for a discrete set of displacement values (see Figure~\ref{fig:vessel}(a)).
+It is the position of these reference points, that do not line up with bay endpoints, which is remedied in the VSM.
+%
+Further requirements to ensure the stability of the vessel are imposed in real life and considered eg. in \cite{AlbertosThesis}, but is not considered here.
+%
+\subsection{Model}
+The vessel data outlined above is used to construct the VSM described in the following.
+%
+\subsubsection{Sets and constants}
+The vessel data given as input to the VSM is given by the sets summarized in Table~\ref{tab:sets} and the constants summarized in Table~\ref{tab:consts}. Buoyancy data and hydrostatic limits are translated to the sections' end points, and the derived constants are included in the table. The calculation of these are explained further below in Section~\ref{sec:constraints}.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{p{1.7cm}p{4.8cm}|p{1.7cm}p{4.8cm}}
+\multicolumn{2}{l}{\textbf{Sets}}\\
+\hline\noalign{\smallskip}
+$L$  																	& Locations. 												& $T$	 																	& Types of containers.\\ 
+$S$	 																	& Sections (ordered set).						& $T^{\{\trt{20},\trt{R}\}}\subseteq T$ & $20'$ long/reefer types, respectively. \\
+$S^{\{\trt{f}, \trt{a}\}}\subseteq S$ & Sections fore/aft, respectively. 	& $\mi{BT}$ 														& Ballast tanks. \\
+$L_s\subseteq L$ 											& Locations in section $s\in S$. 		& $F$	 																	& Frames.\\
+$B$ 																	& Blocks with constant weight. 			& $\mi{ST}$ 														& Stations.\\
+																			&																		& $D$																		& Displacement values.\\
+\end{tabular}\caption{The sets used in the vessel data and the Vessel Stowage Model.}\label{tab:sets}
+\end{table}
+
+The set of stations, $ST$, includes $\sigma^\trt{a}$ and $\sigma^\trt{f}$, which are two (artificial) stations at the aft most and fore most positions of the ship, respectively. Similarly, $F$ contains the frames $f^\trt{a}$ and $f^\trt{f}$. The submerged areas for these stations and bounds for these frames are trivial.
+
+It is assumed that if $L_s\neq \emptyset$ then $L_s$ contains all locations that are positioned within some interval on the longitudinal axis.    
+%$\forall s\in S\forall l\in L: \min\set{P^\trt{a}_{l'}}{l'\in L_s}\leq l \leq\max\set{P^\trt{f}_{l'}}{l'\in L_s} \Rightarrow l\in L_s$.}
+%%
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{p{3.9cm}p{9.5cm}}
+\multicolumn{2}{l}{\textbf{Constants}}\\
+\hline\noalign{\smallskip}
+$C_l^{\{\trt{20}, \trt{40}, \trt{TEU}\}}\in \mathbb{N}$ 		& The capacity in TEU for location $l\in L$ w.r.t. $20'$ containers/$40'$ container/TEUs in total. \\
+$C_l^{\{\trt{RS}, \trt{RC}\}}\in \mathbb{N}$								& The number of reefer slots/reefer cells in location $l\in L$.\\
+$C_l^{\{\trt{W20}, \trt{W40}\}}\in \mathbb{N}$							& The weight capacity of  $20'$/$40'$ containers in location $l\in L$.\\
+$W^\tau, W_b\in \mathbb{R}^+_0$ 																& The weight of container type $\tau\in T$, and of block $b\in B$, respectively. \\
+$A_{\sigma, d}\in \mathbb{R}^+_0$ 													&	The area submerged in water at station $\sigma\in ST$ for a displacement $d\in D$.\\
+$P^{\{\trt{f},\trt{a}\}}_{l}$, $P^{\{\trt{f},\trt{a}\}}_{b}$, $P^{\{\trt{f},\trt{a}\}}_{t}\in \mathbb{R}$, 
+																														&	The longitudinal position of the fore/aft endpoint of location $l\in L$, block $b \in B$, and tank $t \in BT$, 
+																														  respectively.\\
+$P_{f}$, $P_{\sigma}\in\mathbb{R}$ 
+																														&	The longitudinal position of frame $f \in F$, and of station $\sigma\in \mi{ST}$, respectively.\\
+$\mi{Max}^\trt{W}$, $\mi{Max}^\trt{WT}_b\in \mathbb{R}^+$		&	Upper bound for the total displacement and for ballast tank $b\in BT$, respectively.\\
+$\mi{SF}^{\{+,-\}}_f$, $\mi{BM}^{\{+,-\}}_f\in\mathbb{R}$ 	&	Upper/lower bounds for the shear force and bending moment at each frame $f\in F$, respectively.\\
+\multicolumn{2}{l}{\textbf{Derived constants}}\\
+\hline\noalign{\smallskip}
+$P^{\{\trt{f},\trt{a}\}}_s \in \mathbb{R}$ 									& The fore/aft position of section $s \in S$.\\  
+$\mi{SF}^{\{+,-\}}_s$, $\mi{BM}^{\{+,-\}}_s\in\mathbb{R}$		& Upper/lower bounds for the shear force and bending moment, respectively, at the aft endpoint of section $s\in S$.\\
+$\mi{Max}^\trt{WT}_s\in \mathbb{R}$													& Upper bound for the weight of ballast tanks in section $s\in S$.\\
+$A''_{p, d}\in \mathbb{R}^+_0$															&	Approximation of the area submerged in water at a longitudinal position $p$ along the vessel for a displacement $d\in \mathbb{R}$.\\
+\end{tabular}
+\caption{Constants used in the vessel data and derived constants.}\label{tab:consts}
+\end{table}
+
+\subsubsection{Variables}
+The variables of the Vessel Stowage Model (VSM) are summarized in Table~\ref{tab:vars}. As decision variables we use $x_{l,\tau}$ for all $l\in L$ and $\tau \in T$, which denotes the number of containers of type $\tau$ stowed in location $l$, and $t_s$ for all $s\in S$, which denotes the amount of ballast water in ballast tanks in section $s$. 
+We note that even though $x_{l,\tau}$ is a number of containers and hence a natural number, we model it as a real number to ensure that the resulting model is an LP. 
+%
+
+As important auxiliary variables, we define $x_\tau$ for all $\tau\in T$ (see \eqref{typeDef} below), the number of containers of type $\tau$ on the vessel in total, disregarding their placements. It is the relationship among these variables that we are actually interested in, since these relationships define the wanted capacity model. Thus, when producing the capacity model from the VSM described in this section, we eliminate all variables but $\set{x_\tau}{\tau \in T}$.  
+%
+\begin{table}[hbtp]
+\centering
+\begin{tabular}{p{2.5cm}p{10cm}}
+\multicolumn{2}{l}{\textbf{Decision variables}}\\
+\hline
+$x_{l,\tau}\in \mathbb{R}^+_0$		& Number of containers of type $\tau\in T$ to be stowed in each location $l\in L$.\\
+$t_s\in \mathbb{R}^+_0$						& The weight of ballast tanks within section $s\in S$.\\
 \\
+\multicolumn{2}{l}{\textbf{Auxilliary variables}}\\
+\hline
+$x_\tau\in \mathbb{R}^+_0$ 				& The total number of containers of type $\tau\in T$.\\
+$w_s\in \mathbb{R}^+_0$						& The weight of section $s\in S$, everything included.\\
+$w\in \mathbb{R}^+_0$							& The total displacement (weight).\\
+$b_{s,d} \in\mathbb{R}^+_0$ 					& The buoyancy force for section $s \in S$ with a total displacement of $d\in \mathbb{R}$.\\
+$\mi{sf}_s\in \mathbb{R}$ 				& The shear force at the aft endpoint of section $s\in S$.\\
+$\mi{bm}_s\in \mathbb{R}$ 				& The bending moment at the aft endpoint of section $s\in S$.\\
+%
+\end{tabular}
+\caption{Variables used in the Vessel Stowage Model.}\label{tab:vars}
+\end{table}
+%
+\subsubsection{Constraints}\label{sec:constraints}
+\paragraph{Location-based capacity constraints}
+As mentioned in Section~\ref{sec:vessel}, the data directly contains various capacities (i.e. upper bounds) for containers in each location. We therefore have constraints that ensure that for each location of the vessel, the stowed containers are within the allowed capacities w.r.t. the number of $20'$ containers, $40'$ containers, TEUs, and the weight of the $20'$ and $40'$ containers, respectively. These constraint are modeled in the inequalities \eqref{20Cap}-\eqref{weight40Cap} below.
+Likewise, constraint, \eqref{combinedWeightCap} ensures that the weight of a location is within limits, taken the different distribution of the weight of $40'$ containers, respectively $20'$ containers, within a slot into consideration. 
+\eqref{reeferSlotCap} and \eqref{reeferCellCap} ensure that each reefer container can be refrigerated, and that {the total number of cells taken up by the reefer containers are within capacity}, respectively. 
+\begin{align}
+	\label{20Cap}
+	{\sum_{\tau \in T^\trt{20}} x_{l,\tau} \leq C_l^\trt{20} } 
+			& \quad \forall l \in L.\\
+	%
+	\label{40Cap}    	
+	\sum_{\tau \in T\setminus T^\trt{20}} 2\cdot x_{l,\tau} \leq C_l^\trt{40} 
+			& \quad \forall l \in L.\\
+	%
+	\label{teuCap}
+	\sum_{\tau \in T^\trt{20}} x_{l,\tau} + 2\cdot\sum_{\tau \in T\setminus T^\trt{20}} x_{l,\tau} \leq C_l^\trt{TEU} 
+			& \quad \forall l \in L.\\
+	%
+	\label{weight20Cap}
+	\sum_{\tau \in T^\trt{20}} W_\tau\cdot x_{l,\tau} \leq C_l^\trt{W20} 
+			& \quad \forall l \in L.\\
+	%
+	\label{weight40Cap}
+	\sum_{\tau \in T\setminus T^\trt{20}} W_\tau\cdot x_{l,\tau} \leq C_l^\trt{W40} 
+			& \quad \forall l \in L. \\
+	%
+	\label{combinedWeightCap}
+	0.5\cdot \sum_{\tau \in T^\trt{20}} W_\tau\cdot x_{l,\tau} + \sum_{\tau T\setminus \in T^\trt{20}		} W_\tau\cdot x_{l,\tau} \leq C_l^\trt{W40} 
+			& \quad \forall l \in L.\\
+	%
+	\label{reeferSlotCap}
+	\sum_{\tau \in T^\trt{R}} x_{l,\tau} \leq C_l^\trt{RS} 
+			& \quad \forall l \in L. \\
+	%
+	\label{reeferCellCap}
+	{\sum_{\tau \in T^\trt{R}\cap T^\trt{20}} 0.5\cdot x_{l,\tau} + \sum_{\tau \in T^\trt{R}\setminus T^\trt{20}} x_{l,\tau} \leq C_l^\trt{RC} } 
+			& \quad \forall l \in L.
+\end{align}	 
+%
+Constraint \eqref{typeDef} below defines the variables, $x_\tau$, that specifies how many containers of a specific type $\tau$ is stowed on the vessel. 
+\begin{equation}
+\label{typeDef}
+	x_\tau = \sum_{l\in L} x_{l,\tau} \quad \forall{\tau \in T}.
+\end{equation}
+For defining the weight of a section, we need its fore and aft position. For \emph{cargo-containing sections}, i.e. sections $s$ for which $L_s\neq \emptyset$, we can find immediate fore- and aft points of the locations in $s$: $P^\trt{if}_s = \max\set{P^\trt{f}_l}{l\in L_s}$, and $P^\trt{ia}_s = \min\set{P^\trt{a}_l}{l\in L_s}$ (see Figure~\ref{fig:sections}). 
+There is a small gap between two consecutive bays, and this space is divided evenly between two consecutive, cargo-containing sections. %, such that the aft end point of the fore-most section aligns with the fore end point of the aft-most section. 
+Sections that are not cargo-containing get their endpoints from the immediate end points of their neighbor sections if these are cargo-containing, and otherwise the non-cargo-containing parts of the vessel is divided evenly among the corresponding non-cargo-containing sections. See Figure~\ref{fig:sections}.
+%
+\begin{figure}[htbp]
+	\centering
+		\includegraphics{figures/sections.pdf}
+	\caption{The doted lines indicates the endpoints of the sections.}
+	\label{fig:sections}
+\end{figure}
+%
+Using the end points of the sections, \eqref{totalWeightDef} below defines the total weight of section $s\in S$, including cargo, ballast tanks and the vessel itself. \eqref{totalDisp} defines the total displacement (weight) of the vessel.   
+
+\begin{align}
+\label{totalWeightDef}
+	w_s &= \sum_{\tau \in T} \sum_{l\in L_s} W_\tau\, x_{l,\tau} + xt_s + \sum_{b\in B} \mi{percent}([P^\trt{a}_b;P^\trt{f}_b],[P^\trt{a}_s;P^\trt{f}_s])\cdot W_b \quad \forall s \in S.\\
+\label{totalDisp}
+w & = \sum_{s\in S} w_s.
+\end{align}
+Here, $\mi{percent}(J, I)$ defines how big a percentage of the interval $J=[J_1; J_2]$ lies within the interval $I = [I_1; I_2]$. That is, 
+\[
+\mi{percent}([J_1;J_2], [I_1; I_2]) = \frac{\max(\min(J_2, I_2)-\max(J_1, I_1),0)}{I_2-I_1}.
+\]
+%
+Capacities for individual tanks are pooled into capacities for tanks within a section, such that the amount of ballast water in any section $s$ is limited by the amount of water in the portion of each tank that lies within that section combined \eqref{btLim}. Further it is required to be non-negative \eqref{btLim}. 
+Likewise, the number of containers of each type placed in each section is non-negative \eqref{xPos}. Finally, the total displacement (weight) is required to be within limits \eqref{wTotalLim}.
+\begin{align}
+	\label{btLim}
+	0 &\leq t_s \leq \sum_{b \in BT} \mi{percent}([P_b^\trt{a};P_b^\trt{f}],[P_s^\trt{a};P_s^\trt{f}])\cdot \mi{Max}^\trt{WT}_b  \quad \forall s\in S.\\
+	%
+	\label{xPos}
+	0 &\leq x_{l,\tau} \quad \forall l\in L, \tau\in T.\\
+	%
+	\label{wTotalLim}
+	w &\leq \mi{Max}^\trt{W}. 
+\end{align}
+%%
+\paragraph{Hydrostatic constraints}
+For a station $\sigma\in\mi{ST}$, the submerged area of the cross-section for a given displacement $d\in D$ is given by $A_{\sigma,d}$. From these values we make an approximation of the submerged area at $\sigma$ for any positive displacement $d\in \mathbb{R}_o^+$. This is done by linearizing the values between the maximal displacement value given in the table, $d_\mi{max}=\text{max}\{d\in D\}$, and a displacement value $d_\mi{min}$ at the point where the hull does not curve too much anymore. For the cross-section given in Figure~\ref{fig:vessel}(b) this would correspond to the displacement giving rise to the marked waterline. We note that since our VSM will mainly be used for some sort of maximization of loaded cargo it is fair to assume that the displacement will be above the found $d_\mi{min}$.
+
+Thus, the approximation of the submerged area is  
+\[
+A'_{\sigma,d} = \frac{A_{\sigma,d_{max}} - A_{\sigma,d_{min}}}{d_{max} - d_{min}} \cdot (\mi{w} - d_{max}) + A_{\sigma,d_{max}} \quad \forall d\in \mathbb{R}^+_0.
+\]
+
+The submerged area between two consecutive stations $\sigma$ and $\sigma'$ are then linearized, so that the submerged area for displacement $d$ at any point $p\in[P_\sigma;P_{\sigma'}]$ %, where $\sigma\neq \sigma^\trt{f}$ and $\sigma' = \mi{argmin}_{\set{s}{P_s > P_\sigma}}P_s$, 
+is approximated by
+\[
+A''_{p,d} = \frac{A'_{\sigma',d}-A'_{\sigma,d}}{P_{\sigma'}-P_\sigma}\cdot(p-P_\sigma) + A'_{\sigma,d}.
+\]
+
+From this we can calculate an approximation of the buoyancy of section $s\in S$ for a given $d\in \mathbb{R}^+_0$ by averaging the areas between the two endpoints of $s$ and multiplying with the distance between the points and the density of salt water.\footnote{Though all weights in principle have to be multiplied by the gravitational acceleration to get a force, it is a common practice to omit this in these calculations.} If there are stations lying within $s$, several volumes are calculated and added.
+Thus, let $P := \{P^\trt{a}_s, P^\trt{f}_s\} \cup \set{P_\sigma}{\sigma\in ST,\; P^\trt{a}_s < P_\sigma < P^\trt{f}_s}$ be the section's end points together with the stations between the two endpoints. Then the buoyancy of section $s\in S$ at a displacement $d\in\mathbb{R}^+_0$ is defined by equation \eqref{defBancy}. 
+\begin{equation}\label{defBancy}
+b_{s,d} = \sum_{p \in P\setminus \{P^\trt{f}_s\}} \frac{1}{2}\cdot(A''_{p,d}+A''_{\mi{next}_p,d})\cdot (\mi{next}_p-P), \text{where } \mi{next}_p = \min\set{p' \in P}{p' > p}.
+\end{equation}
+
+To obtain upper (lower) bounds for the shear force at the sections' aft endpoints,  
+we linearize the upper (lower) bound for the shear force between two consecutive frames as a function of their position. To obtain the bounds for the shear force at the aft endpoint of $s$, we then use this linearization given by the point's two closest surrounding frames. Similarly for the upper and lower bounds for the bending moment.
+
+Thus, the upper bounds for the shear force at the aft endpoint of section $s\in S$ is
+\[
+\mi{SF}^+_s = \frac{\mi{SF}^+_{f_2}-\mi{SF}^+_{f_1}}{P_{f_2}-P_{f_1}}\cdot(P^\trt{a}_s - P_{f_1}) + \mi{SF}^+_{f_1}, 
+\]
+where $f_1 = \text{argmax}_{\set{f\in F}{P_f\leq P^\trt{a}_s}}P_f$ and $f_2 = \text{argmin}_{\set{f\in F}{P_f>P^\trt{a}_s}}P_f$. Of course, if there is an $f\in F$ such that $P^\trt{a}_s = P_f$ then we let $\mi{SF}^+_s = \mi{SF}^+_f$. Similarly we find $\mi{SF}^-_s$, as well as $\mi{BM}^+_s$ and $\mi{BM}^\trt{-}_s$.   
+
+Given a displacement $d\in\mathbb{R}^+_0$, the shear forces and bending moment at each section $s$'s aft endpoint can then be calculated. If $s\in S^\trt{f}$ ($s\in S^\trt{a}$), then the shear force at the aft endpoint equals the total weight $w_s$ of the sections fore (aft) $P^\trt{a}_s$ minus the buoyancy of the sections fore (aft) $P^\trt{a}_s$, see \eqref{sf}.   
+%
+Similarly, the bending moment at section $s$'s aft endpoint is calculated as the sum of resulting forces of sections $s'$ lying fore (aft) $P^\trt{a}_s$ times the distance from $P^\trt{a}_s$ to $s'$'s (longitudinal) midpoint \eqref{bm}. The constraints \eqref{sfLim} and \eqref{bmLim} then ensure that the shear force and bending moment are within limits.
+
+\begin{gather}
+	\label{sf}
+	\mi{sf}_s = \sum_{s' \in S'_s} (w_{s'} - b_{s',w}) \quad \forall s \in S,\\
+\nonumber \text{where }S'_s = \left\{
+\begin{array}{ll} \set{s' \in S^\trt{f}}{P^\trt{f}_{s'} \geq P^\trt{f}_s}&\text{if }s \in S^\trt{f}\\
+									\set{s' \in S^\trt{a}}{P^\trt{a}_{s'} < P^\trt{a}_s}&\text{if }s \in S^\trt{a}\end{array}\right..
 \\
-%\paragraph{Structure of article}
-This article is organized as follows. In Section~\ref{sec:defs} we introduce the required definitions and notation. This is followed by Section~\ref{sec:methods} that outlines the methods used in our FME framework. Subsequently, in Section~\ref{sec:decomp}, we detail how block-angular problems are decomposed, after which we present the vessel models (stowage models) that are projected in Section~\ref{sec:VMs}. Finally follows our experimental results (Section~\ref{sec:results}), before Section~\ref{sec:concl} concludes.
+	%
+	\label{sfLim}
+	\mi{SF}^-_s \leq \mi{sf}_s \leq \mi{SF}^+_s\quad \forall s \in S.\\
+	%
+	\label{bm}
+	\mi{bm}_s = 	\sum_{s' \in S'_s} (w_{s'} + b_{s',w})\cdot |P^\trt{a}_s - \frac{P^\trt{f}_{s'}-P^\trt{a}_{s'}}{2}|
+	\quad \forall s \in S.\\
+	%
+	\label{bmLim}
+	\mi{BM}^-_s \leq \mi{bm}_s \leq \mi{BM}^+_s \quad \forall s \in S. 
+\end{gather}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Definitions and notation}\label{sec:defs}
@@ -412,95 +670,6 @@ The pseudocode for this is presented below. Besides a system $S$ and a variable 
 All workers project a system using the FME framework, which again involves parallel redundancy removal, and thus it is important to only use as many resources (threads) in total as there are available.
 Then, when at some point there are less nodes left to project than there are workers in $W$, the superfluous workers can pass on their resources to the remaining workers.  
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Vessel Stowage Model}\label{sec:VMs}
-In this section, we will describe the vessel stowage model (VSM) that is the basis for our projections. The model is adapted from work by Delgado (\cite{AlbertosThesis}). In the following, we will describe the given vessel data and further explain how this information is translated into the VSM.
-The data used as input to the VSMs are real vessel profile files used by a professional loading computer. 
-
-Our VSM includes various stowage constraints and further {describes the hydrostatic constraints reasonably accurate while}
-abstracting away much of the unnecessary complexity relating to the physical layout of the vessel that is present in the data. 
-More specifically, the buoyancy data used in hydrostatic calculations are given at a set of points along the vessel (stations), while hydrostatic constraints are given in relation to another set of points (frames), and neither of these coincide with the position of the structures holding the cargo or the ballast tanks (see Figure~\ref{fig:vessel}(a)). The measure points are aligned in the VSM (see Figure~\ref{fig:sectionEndPoints}), and calculations for the hydrostatic constraints are simplified.
-
-\subsection{Vessel data}
-The cargo space of a container vessel is divided into parts called \textit{bays} that each consists of a grid of \emph{cells}. Each cell is divided into two \emph{slots} and can accordingly hold one standard 40' container or two 20' containers. Some cells have power plugs allowing for \emph{reefer} containers to be refrigerated as required. Each bay is divided into three or four parts called \textit{locations}, at which level the vessel's capacities are given. See Figure~\ref{fig:vessel}.
-
-\begin{figure}[htbp]
-	\centering
-		\includegraphics{figures/vessel2.pdf}
-	\caption{(a) Vessel structure and reference points seen on a longitudinal intersection and (b) on a transversal intersection.}
-	\label{fig:vessel}
-\end{figure}
-
-To define common reference points for cargo-holding structures and hydrostatic constraints, we further define larger \emph{sections} of the vessel and their endpoints. Each of these sections either span a number of succeeding bays, or a part of the ship containing no bays at all.
-See Figure~\ref{fig:sectionEndPoints}. {Note that this is \emph{not} part of the data in vessel profile file, but an input we define.} 
-
-\begin{figure}[htbp]
-	\centering
-		\includegraphics{figures/sectionEndPoints.pdf}
-	\caption{Sections on a vessel. Their endpoints are used as common reference points for cargo-holding structures and hydrostatic constraints in the VSM.}
-	\label{fig:sectionEndPoints}
-\end{figure}
-
-An empty vessel without cargo ballast or equipment is referred to as \emph{lightship}.  The lightship is given in the data by a set of ``blocks'' placed along the vessel. Each block has a given weight that is assumed to be equally distributed along the block.
-%
-The cargo itself is described by a container \emph{type}, which is defined by a length (20' or 40')\footnote{45' long containers are also common, but for the sake of simplicity, we only consider 20' and 40' containers in this article.}, whether it is a reefer-container or not, and a weight class (in a discrete set of weights). 
-Besides containers, vessels also carry \emph{ballast tanks} in fixed positions along the vessel that can be filled with water to improve the stability of the vessel.
-
-%\paragraph{Capacities}
-Though containers physically are placed in specific slots, the considered vessel data specifies capacities for each location. These capacities are given in \emph{TEU} (Twenty-foot Equivalent Units), i.e. a standard $20'$ container takes up one TEU, while a $40'$ container takes up two TEU. For each location, the vessel data includes upper bounds for: the total number of TEUs, $20'$ containers, $40'$ containers, reefer slots, reefer cells, plus separate total weight limit for $20'$ and $40'$ containers, respectively. The latter exist, since only $20'$ containers rest on the middle support posts of the stack it is in, while the end posts hold weight of both $20'$ and $40'$ containers. This may lead to different weight capacities of $20'$ and $40'$ containers.
-%
-Limits for each ballast tank are likewise given in the input data, as well as a limit for the total displacement, i.e. the weight of the vessel, including ballast water, cargo and the ship itself. 
-
-%\paragraph{Stress forces}
-On a vessel, stress forces arise as a result of gravitation acting downwards and buoyancy acting upwards. This results in shear forces and bending moments along the longitudinal axis of the vessel, and limits on these are given for a set of reference points along the vessel called \emph{frames} (see Figure~\ref{fig:vessel}(a)). 
-%
-The buoyancy force comes from the vessel's displacement of water and hence depends on the varying (and irregular) shape of the hull and the displacement of the vessel. The area submerged in water is given at another set of reference points called \emph{stations} for a discrete set of displacement values (see Figure~\ref{fig:vessel}(a)).
-It is the position of these reference points, that do not line up with bay endpoints, which is remedied in the VSM.
-%
-Further requirements to ensure the stability of the vessel are imposed in real life and considered eg. in \cite{AlbertosThesis}, but is not considered here.
-\\\\
-%\paragraph{Input Data}
-The vessel structure is described using the sets $L$ (locations), $BT$ (ballast tanks), $B$ (blocks with a constant weight $W_b$ for all $b\in B$), $ST$ (stations) and $F$ (frames). All elements in these sets have a fixed longitudinal position fore and aft ( $P^\trt{f}_e$ and $P^\trt{a}_e$ for all $e\in L\cup BT \cup B \cup ST \cup F$), and for the latter two sets, the fore and aft position coincide. %[For modeling purposes, an (artificial) station and a frame are assumed given at the endpoint of the vessel for which the submerged areas and limits, respectively, are 0.]
-%
-The division of the vessel into sections is described by the sets $S$ (sections), which is divided into sections fore and aft ($S^\trt{f}$ and $S^\trt{a}$), as well as a set $L_s$ for all $s\in S$ (locations in section $s$). A fore and aft position of each $s$ ($P^\trt{f}_s$ and $P^\trt{a}_s$) is implicitly given by the locations in $L_s$.% (Taking the minimum aft-position of the locations in $s$ and the maximum fore-position, respectively, specifies the fore position, $P^\trt{f}_s$, and aft position, $P^\trt{a}_s$, of $s$.
-
-The cargo is described by the set $T$ (container types) with subsets $T^\trt{20}$ ($20'$ container types -- $T\setminus T^\trt{20}$ hence indicates the set of $40'$ container types) and $T^\trt{R}$ (reefer container types). 
-Further, each container type $\tau \in T$ has a weight, $W^\tau$, associated.
-
-The capacity-limits are given by the constants $C^\trt{TEU}_l$, $C^\trt{20}_l$, $C^\trt{40}_l$, $C^\trt{RS}_l$, $C^\trt{RC}_l$, $C^\trt{W20}_l$, $C^\trt{W40}_l$ for each $l\in L$, and by $\mi{Max}^\trt{w}_b$ for all $b\in BT$, plus $\mi{Max}^\trt{w}$. The limits on the stress forces are given by $\mi{Max}^\trt{sf}_f$, $\mi{Min}^\trt{sf}_f$, $\mi{Max}^\trt{bm}_f$, $\mi{Min}^\trt{bm}_f$ for all $f\in F$. At each station $\sigma\in ST$, the submerged area of the ship at $\sigma$ is given for a discrete set of displacements in the table $A_\sigma$.
-
-\subsection{Model}
-The input data outlined above is used to construct the VSM described in the following.
-
-\paragraph{Variables}
-As decision variables we use $x_{l,\tau}$ for all $l\in L$ and $\tau \in T$, which denotes the number of containers of type $\tau$ stowed in location $l$, and $t_s$ for all $s\in S$, which denotes the amount of ballast water in ballast tanks in section $s$. 
-
-As important auxiliary variables, we define $x_\tau = \sum_{l\in L} x_{l,\tau}$ for all $\tau\in T$, the number of containers of type $\tau$ on the vessel in total, disregarding their placements. It is the relationship among these variables that we are actually interested in, since these relationships define the wanted capacity model. Thus, when producing the capacity model from the VSM described in this section, we project all variables but $\set{x_\tau}{\tau \in T}$.  
-
-Another important auxiliary variable is $w_s$, denoting the total weight of section $s$, everything included. Likewise the total weight, $w = \sum_{s\in S}w_s$ is used in hydrostatics constraints (see further below). 
-Other auxiliary variables used to ease notation are mentioned below as necessary.
-
-\paragraph{Constraints}
-%\paragraph{Capacity constraints}
-As mentioned above, the data directly contains various capacities (i.e. upper bounds) for containers in each location. For example, for each $l\in L$, the inequality $\sum_{\tau \in T^\trt{20}}x_{l,\tau} + \sum_{t\in T\setminus T^\trt{20}}2\cdot x_{l,\tau}\leq C^\trt{TEU}_l$  describes the total TEU capacity constraint of location $l$, while $\sum_{\tau \in T^\trt{20}}x_{l,\tau}\cdot W^\tau\leq C^\trt{20W}_l$ describes the weight capacity for 20' containers in location $l$.
-
-Capacities for individual tanks are pooled into capacities for tanks within a section, such that the amount of ballast water in any section $s$ is limited by the amount of water in the portion of each tank that lies within that section combined; multiplying with the density for ballast water, we get an upper bound for $t_s$, which is then imposed as a constraint.
-We also define constraints to ensure that all variables $x_{s,\tau}$ and $t_s$ are positive and that $w\leq\mi{Max}^\trt{w}$. 
-\\\\
-%\paragraph{Hydrostatic constraints}
-For a station $\sigma$, the values in the table $A_{\sigma}$ can be used to make an approximation of the submerged area at $\sigma$ for any positive displacement. This is done by linearizing the values between the maximal displacement value given in the table and a displacement value $d_\mi{min}$ at the point where the hull does not curve too much anymore. For the cross-section given in Figure~\ref{fig:vessel}(b) for $\sigma$ this would correspond to the displacement giving rise to the marked waterline.
-We note that since our VSM will mainly be used for some sort of maximization of loaded cargo it is fair to assume that the displacement will be above the found $d_\mi{min}$.
-The submerged area at a point $p$ between two consecutive stations for a given displacement can then also be linearized as a function of $p$. 
-From this, an approximation of the buoyancy of section $s$ for a given $d$ is calculated by averaging the areas between the two endpoints of $s$ and multiplying with the distance between the points and the density of salt water.\footnote{Though all weights in principle have to be multiplied by the gravitational acceleration to get a force, it is a common practice to omit this in these calculations.} If there are stations lying within $s$, several volumes are calculated and added.
-On the other hand, the downward-acting force at section $s$ is given by the weight $w_s$. For $s$, the resulting force, is thus the weight of section $s$ minus the (positive) buoyancy stemming from $s$.  
-  
-Given a displacement $d$, the shear forces and bending moment at each section $s$'s aft endpoint is then calculated. For sections in $S^\trt{f}$ ($S^\trt{a}$), the shear force  equals the sum of resulting forces fore (aft) of the aft endpoint $P^\trt{a}_s$, while the bending moment equals the sum of resulting forces of sections $s'$ lying fore (aft) $P^\trt{a}_s$ times the distance from $P^\trt{a}_s$ to $s'$'s (longitudinal) midpoint.
-
-To obtain upper (lower) bounds for the shear force at the sections' aft endpoints,  
-we linearize the upper (lower) bound for the shear force between two consecutive frames as a function of their position. To obtain the bounds for the shear force at the aft endpoint of $s$ we then use this linearization given by the point's two closest surrounding frames. Similarly for the upper and lower bounds for the bending moment.
-
-Hydrostatic constraints are then added to our model to ensure that the shear force and bending moment at each section's aft endpoint is within the calculated upper and lower bounds.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}\label{sec:results}
 From data for a specific vessel, we have constructed a number of different models, where the weight and hydrostatics are taken into account to various degrees. The first model does not consider the weight of the containers at all (i.e. the described constraints limiting the total displacement as well as all hydrostatic constraints have been removed), the second model does not model any hydrostatic constraints, and the subsequent models consider the hydrostatic constraints at 2, 4, 6 and 8 measure points, respectively.
@@ -593,7 +762,7 @@ We also note that the runtime, even for the decomposed projections, are not exac
 
 \subsection{Revenue optimization}
 The original and the projected models have been optimized for revenue using CPLEX. 
-Each transported container yields a revenue which is based on its type, i.e. on the size, weight and reefer-property of the container. More specifically, for our tests, reefer containers yields the double revenue as a similar non-reefer container, 40' containers have a revenue which is 1.5 times higher as a similar 20' container, while containers are more expensive the heavier it is. A 20', non-reefer container, with a weight, respectively of 6, 21, and 27 ton, is assigned the following revenue in USD: 100, 600 and 700, respectively.   
+Each transported container yields a revenue which is based on its type, i.e. on the size, weight and reefer-property of the container. More specifically, for our tests, reefer containers yields the double revenue as a similar non-reefer container, $40'$ containers have a revenue which is 1.5 times higher as a similar $20'$ container, while containers are more expensive the heavier it is. A $20'$, non-reefer container, with a weight, respectively of 6, 21, and 27 ton, is assigned the following revenue in USD: 100, 600 and 700, respectively.   
 
 Table~\ref{tab:usingProjections} shows the number of iterations, the deterministic time and the objective value found by CPLEX when optimizing revenue for the original and projected models. It likewise shows how many times faster, the projections are w.r.t. iteration and ticks, as well as the difference in objective value in percentage. For comparison, the number of iterations, deterministic time and objective value is shown too for the simple model, which was mentioned previously.
 
@@ -703,204 +872,5 @@ We would like to thank Stefan R{\o}pke, Thomas Stidsen, and David Pisinger for d
 
 \bibliography{bibfile}{}
 \bibliographystyle{alpha}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
-\section*{Appendix}
-\subsection*{Vessel data}
-The vessel data is given by the sets summarized in Table~\ref{tab:sets} and the constants summarized in Table~\ref{tab:consts}. In the Vessel Stowage Model (VSM), buoyancy data and hydrostatic constraints are translated to sections' end points. The constants derived in this way are included in Table~\ref{tab:consts}. They are calculated from the vessel data as explained further below.
-%
-\begin{center}
-\begin{table}[htbp]
-\begin{tabular}{p{1.7cm}p{4.8cm}|p{1.7cm}p{4.8cm}}
-\multicolumn{2}{l}{\textbf{Sets}}\\
-\hline\noalign{\smallskip}
-$L$  																	& Locations. 												& $T$	 																	& Types of containers.\\ 
-$S$	 																	& Sections (ordered set).						& $T^{\{\trt{20},\trt{R}\}}\subseteq T$ & $20'$ long/reefer types, respectively. \\
-$S^{\{\trt{f}, \trt{a}\}}\subseteq S$ & Sections fore/aft, respectively. 	& $\mi{BT}$ 														& Ballast tanks. \\
-$L_s\subseteq L$ 											& Locations in section $s\in S$. 		& $F$	 																	& Frames.\\
-$B$ 																	& Blocks with constant weight. 			& $\mi{ST}$ 														& Stations.\\
-																			&																		& $D$																		& Displacement values.\\
-\end{tabular}\caption{The sets used in the vessel data and the Vessel Stowage Model.}\label{tab:sets}
-\end{table}
-\end{center}
-%
-The set of stations, $ST$, includes $\sigma^\trt{a}$ and $\sigma^\trt{f}$, which are two (artificial) stations at the aft most and fore most positions of the ship, respectively. Similarly, $F$ contains the frames $f^\trt{a}$ and $f^\trt{f}$. The areas (bounds) for these stations (frames) are trivial.
-
-It is assumed that if $L_s\neq \emptyset$ then $L_s$ contains all locations that are positioned within some interval on the longitudinal axis.    
-%$\forall s\in S\forall l\in L: \min\set{P^\trt{a}_{l'}}{l'\in L_s}\leq l \leq\max\set{P^\trt{f}_{l'}}{l'\in L_s} \Rightarrow l\in L_s$.}
-
-\begin{table}[htbp]
-\centering
-\begin{tabular}{p{3.9cm}p{9.5cm}}
-\multicolumn{2}{l}{\textbf{Constants}}\\
-\hline\noalign{\smallskip}
-$C_l^{\{\trt{20}, \trt{40}, \trt{TEU}\}}\in \mathbb{N}$ 		& The capacity in TEU for location $l\in L$ w.r.t. $20'$ containers/$40'$ container/TEUs in total. \\
-$C_l^{\{\trt{RS}, \trt{RC}\}}\in \mathbb{N}$								& The number of reefer slots/reefer cells in location $l\in L$.\\
-$C_l^{\{\trt{W20}, \trt{W40}\}}\in \mathbb{N}$							& The weight capacity of  $20'$/$40'$ containers in location $l\in L$.\\
-$W^\tau, W_b\in \mathbb{R}$ 																& The weight of container type $\tau\in T$, and of block $b\in B$, respectively. \\
-$A_{\sigma, d}\in \mathbb{R}^+_0$ 													&	The area submerged in water at station $\sigma\in ST$ for a displacement of $d\in D$.\\
-$P^{\{\trt{f},\trt{a}\}}_{l}$, $P^{\{\trt{f},\trt{a}\}}_{b}$, $P^{\{\trt{f},\trt{a}\}}_{t}\in \mathbb{R}$, 
-																														&	The longitudinal position of the fore/aft endpoint of location $l\in L$, block $b \in B$, and tank $t \in BT$, 
-																														  respectively.\\
-$P_{f}$, $P_{\sigma}\in\mathbb{R}$ 
-																														&	The longitudinal position of frame $f \in F$, and of station $\sigma\in \mi{ST}$, respectively.\\
-$\mi{Max}^\trt{W}$, $\mi{Max}^\trt{WT}_b\in \mathbb{R}^+$		&	Upper bound for the total displacement and for ballast tank $b\in BT$, respectively.\\
-$\mi{SF}^{\{+,-\}}_f$, $\mi{BM}^{\{+,-\}}_f\in\mathbb{R}$ 	&	Upper/lower bounds for the shear force and bending moment at each frame $f\in F$, respectively.\\
-\multicolumn{2}{l}{\textbf{Derived Constants}}\\
-\hline\noalign{\smallskip}
-$P^{\{\trt{f},\trt{a}\}}_s \in \mathbb{R}$ 									& The fore/aft position of section $s \in S$.\\  
-$\mi{SF}^{\{+,-\}}_s$, $\mi{BM}^{\{+,-\}}_s\in\mathbb{R}$		& Upper/lower bounds for the shear force and bending moment, respectively, at the aft endpoint of section $s\in S$.\\
-$\mi{Max}^\trt{WT}_s\in \mathbb{R}$													& Upper bound for the weight of ballast tanks in section $s\in S$.\\
-$A''_{p, d}\in \mathbb{R}^+_0$															&	Approximation of the area submerged in water at a longitudinal position $p$ for a displacement of $d\in \mathbb{R}$.\\
-\end{tabular}
-\caption{Constants used in the vessel data and derived constants.}\label{tab:consts}
-\end{table}
-
-\subsection*{Vessel Stowage Model}
-The variables of the Vessel Stowage Model (VSM) are summarized in Table~\ref{tab:vars}. We note that even though $x_{l,\tau}$ is a number of containers and hence a natural number, we model it as a real number to ensure that the resulting model is an LP. The constraints of the model are described further below.
-%
-\begin{table}[hbtp]
-\centering
-\begin{tabular}{p{2.5cm}p{10cm}}
-\multicolumn{2}{l}{\textbf{Decision variables}}\\
-\hline
-$x_{l,\tau}\in \mathbb{R}^+_0$		& Number of containers of type $\tau\in T$ to be stowed in each location $l\in L$.\\
-$t_s\in \mathbb{R}^+_0$						& The weight of ballast tanks within section $s\in S$.\\
-\\
-\multicolumn{2}{l}{\textbf{Auxilliary variables}}\\
-\hline
-$x_\tau\in \mathbb{R}^+_0$ 				& The total number of containers of type $\tau\in T$.\\
-$w_s\in \mathbb{R}^+_0$						& The weight of section $s\in S$, everything included.\\
-$w\in \mathbb{R}^+_0$							& The total displacement (weight).\\
-$b_{s,d} \in\mathbb{R}$ 					& The buoyancy force for section $s \in S$ with a total displacement of $d\in \mathbb{R}$.\\
-$\mi{sf}_s\in \mathbb{R}$ 				& The shear force at the aft endpoint of section $s\in S$.\\
-$\mi{bm}_s\in \mathbb{R}$ 				& The bending moment at the aft endpoint of section $s\in S$.\\
-%
-\end{tabular}
-\caption{Variables used in the Vessel Stowage Model.}\label{tab:vars}
-\end{table}
-%
-\subsubsection*{Constraints}
-\paragraph{Location-based capacity constraints}
-Firstly, we have constraints that ensure that for each location of the vessel, the stowed containers are within the allowed capacities w.r.t. the number of $20'$ containers, $40'$ containers, TEUs, and the weight of the $20'$ and $40'$ containers, respectively. These constraint are modeled in the inequalities \eqref{20Cap}-\eqref{weight40Cap} below.
-{Likewise, we have a constraint, \eqref{combinedWeightCap}, that ensures that the weight of a location is within limits, taken the different distribution of the weight of $40'$ containers, respectively $20'$ containers, within a slot into consideration; the weight of a $40'$ container is distributed on the four outer corner places of a slot while the weight of $20'$ containers also rest on the inner corners of the slot.}
-Lastly, \eqref{reeferSlotCap} and \eqref{reeferCellCap} ensure that each reefer container can be refrigerated, and that {the total number of cells taken up by the reefer containers are within capacity}, respectively. 
-\begin{align}
-{\forall l \in L:}&\quad
-	\label{20Cap}
-	{\sum_{\tau \in T^\trt{20}} x_{l,\tau} \leq C_l^\trt{20} }\\
-	%
-	\label{40Cap}    	
-	{\forall l \in L:}&\quad
-	{\sum_{\tau \in T\setminus T^\trt{20}} 2\cdot x_{l,\tau} \leq C_l^\trt{40} }\\
-	%
-	\label{teuCap}
-	\forall l \in L:&\quad
-	\sum_{\tau \in T^\trt{20}} x_{l,\tau} + 2\cdot\sum_{\tau \in T\setminus T^\trt{20}} x_{l,\tau} \leq C_l^\trt{TEU}\\
-	%
-	\label{weight20Cap}
-	\forall l \in L:&\quad
-	\sum_{\tau \in T^\trt{20}} W_\tau\cdot x_{l,\tau} \leq C_l^\trt{W20}\\
-	%
-	\label{weight40Cap}
-	\forall l \in L:&\quad\sum_{\tau \in T\setminus T^\trt{20}} W_\tau\cdot x_{l,\tau} \leq C_l^\trt{W40} \\
-	%
-	\label{combinedWeightCap}
-	\forall l \in L:&\quad 0.5\cdot \sum_{\tau \in T^\trt{20}} W_\tau\cdot x_{l,\tau} + \sum_{\tau T\setminus \in T^\trt{20}		} W_\tau\cdot x_{l,\tau} \leq C_l^\trt{W40}\\
-	%
-	\label{reeferSlotCap}
-	\forall l \in L:&\quad\sum_{\tau \in T^\trt{R}} x_{l,\tau} \leq C_l^\trt{RS} \\
-	%
-	\label{reeferCellCap}
-	{\forall l \in L:}&\quad
-	{\sum_{\tau \in T^\trt{R}\cap T^\trt{20}} 0.5\cdot x_{l,\tau} + \sum_{\tau \in T^\trt{R}\setminus T^\trt{20}} x_{l,\tau} \leq C_l^\trt{RC} }
-\end{align}	 
-%
-The constraint in \eqref{typeDef} defines the variables, $x_\tau$, that specifies how many containers of a specific type $\tau$ is stowed on the vessel. These are the variables that the projected (in)equality system, the capacity model, is expressed in.
-\begin{equation}
-\label{typeDef}
-	\forall{\tau \in T}: x_\tau = \sum_{l\in L} x_{l,\tau}
-\end{equation}
-%
-For defining the weight of a section, we need its fore and aft position. For \emph{cargo-containing sections}, i.e. sections $s$ for which $L_s\neq \emptyset$, we can find immediate fore- and aft points of the locations/bays in $s$: $P^\trt{if}_s = \max\set{P^\trt{f}_l}{l\in L_s}$, and $P^\trt{ia}_s = \min\set{P^\trt{a}_l}{l\in L_s}$ (see Figure~\ref{fig:sections}). 
-There is a small gap between two consecutive bays, and this space is divided evenly between two consecutive, cargo-containing sections. %, such that the aft end point of the fore-most section aligns with the fore end point of the aft-most section. 
-Sections that are not cargo-containing get their endpoints from the immediate end points of their neighbor sections if these are cargo-containing, and otherwise the non-cargo-containing parts of the vessel is divided evenly among the corresponding non-cargo-containing sections. See Figure~\ref{fig:sections}.
-%
-\begin{figure}[htbp]
-	\centering
-		\includegraphics{figures/sections.pdf}
-	\caption{The doted lines indicates the endpoints of the sections.}
-	\label{fig:sections}
-\end{figure}
-%
-Using the end points of the sections, \eqref{totalWeightDef} below defines the total weight of section $s\in S$, including cargo, ballast tanks and the vessel itself. \eqref{totalDisp} defines the total displacement (weight) of the vessel.   
-
-\begin{align}
-\label{totalWeightDef}
-	\forall s \in S:\quad w_s &= \sum_{\tau \in T} \sum_{l\in L_s} W_\tau\, x_{l,\tau} + xt_s + \sum_{b\in B} \mi{percent}([P^\trt{a}_b;P^\trt{f}_b],[P^\trt{a}_s;P^\trt{f}_s])\cdot W_b.\\
-\label{totalDisp}
-w & = \sum_{s\in S} w_s.
-\end{align}
-Here, $\mi{percent}(J, I)$ defines how big a percentage of the interval $J=[J_1; J_2]$ lies within the interval $I = [I_1; I_2]$. That is, 
-\[
-\mi{percent}([J_1;J_2], [I_1; I_2]) = \frac{\max(\min(J_2, I_2)-\max(J_1, I_1),0)}{I_2-I_1}.
-\]
-We also ensure that the number of containers of each type placed in each location, as well as the amount of ballast in the ballast tanks within each section is positive. 
-For the ballast tanks, we also require that each tank's content is within limits, and likewise for the the total displacement (weight). These constraints are given in \eqref{xPos}, \eqref{btLim}, and \eqref{wTotalLim} below.
-\begin{align}
-	\label{xPos}
-	\forall l\in L, \tau\in T:&\quad 0 \leq x_{l,\tau}.\\
-	%
-	\label{btLim}
-	\forall s \in S:	&\quad 0 \leq t_s \leq \sum_{b \in BT} \mi{percent}([P_b^\trt{a};P_b^\trt{f}],[P_s^\trt{a};P_s^\trt{f}])\cdot \mi{Max}^\trt{WT}_b\\
-%
-	\label{wTotalLim}
-	&\quad w \leq \mi{Max}^\trt{W}
-\end{align}
-\paragraph{Hydrostatic constraints}
-At each station $\sigma$ the submerged area of the cross-section for a given displacement $d\in D$ is given by $A_{\sigma,d}$. We make the assumption that above a given threshold $d_{min}\in D$ (and until the maximal displacement $d_{max} = \text{max}\{d\in D\}$), the submerged area is close to a linear function of the displacement. The submerged area $A'_{\sigma,d}$ for any $d\in [d_{min};d_{max}]$ at station $\sigma$ can therefore be approximated as 
-\[
-A'_{\sigma,d} = \frac{A_{\sigma,d_{max}} - A_{\sigma,d_{min}}}{d_{max} - d_{min}} \cdot (\mi{w} - d_{max}) + A_{\sigma,d_{max}},
-\]
-and we extend this to hold for every $d\in \mathbb{R}$.
-
-The submerged area between two consecutive stations $\sigma$ and $\sigma'$ are linearized, so that the submerged area for displacement $d$ at any point $p\in[P_\sigma;P_{\sigma'}]$ %, where $\sigma\neq \sigma^\trt{f}$ and $\sigma' = \mi{argmin}_{\set{s}{P_s > P_\sigma}}P_s$, 
-is approximated by
-\[
-A''_{p,d} = \frac{A'_{\sigma',d}-A'_{\sigma,d}}{P_{\sigma'}-P_\sigma}\cdot(p-P_\sigma) + A'_{\sigma,d}.
-\]
-
-From this we can calculate the buoyancy of section $s \in S$ at a displacement $d\in \mathbb{R}$. First we let $P := \{P^\trt{a}_s, P^\trt{f}_s\} \cup \set{P_\sigma}{\sigma\in ST,\; P^\trt{a}_s < P_\sigma < P^\trt{f}_s}$ be the section's end points together with the stations between the two endpoints. Then the buoyancy of the section $s$ is given by
-\[
-b_{s,d} = \sum_{p \in P\setminus \{P^\trt{f}_s\}} \frac{1}{2}\cdot(A''_{p,d}+A''_{\mi{next}_p,d})\cdot (\mi{next}_p-P), \text{where } \mi{next}_p = \min\set{p' \in P}{p' > p}.
-\]
-In a similar manner, we linearize the upper bound for the shear force between two consecutive frames, so that the upper bounds for the shear force at the aft endpoint of section $s$ is
-\[
-\mi{SF}^+_s = \frac{\mi{SF}^+_{f_2}-\mi{SF}^+_{f_1}}{P_{f_2}-P_{f_1}}\cdot(P^\trt{a}_s - P_{f_1}) + \mi{SF}^+_{f_1}, 
-\]
-where $f_1 = \mi{argmax}_{\set{f\in F}{P_f\leq P^\trt{a}_s}}P_f$ and $f_2 = \mi{argmax}_{\set{f\in F}{P_f>P^\trt{a}_s}}P_f$. Of course, if there is an $f\in F$ such that $P^\trt{a}_s = P_f$ then we let $\mi{SF}^+_s = \mi{SF}^+_f$. Similarly we find $\mi{SF}^-_s$, as well as $\mi{BM}^+_s$ and $\mi{BM}^\trt{-}_s$.   
-
-The shear forces at each section $s$'s aft endpoint can then be calculated. If $s\in S^\trt{f}$ ($s\in S^\trt{a}$), then the shear force at the aft endpoint equals the total weight $w_s$ of the sections fore (aft) $P^\trt{a}_s$ minus the (positive) buoyancy of the sections fore (aft) $P^\trt{a}_s$, this is given in \eqref{sf} below. For each of the sections, we then require these shear forces to be within limits (\ref{sfLim}).   
-
-Similarly, the bending moment at section $s$'s aft endpoint is calculated as the sum of resulting forces of sections $s'$ ($w_{s'} - b_{s', \mi{wTotal}}$) lying fore (aft) $P^\trt{a}_s$ times the distance from $P^\trt{a}_s$ to $s'$'s (longitudinal) midpoint (\ref{bm}). Naturally, these values are then required to lie within the calculated limits (\ref{bmLim}).
-
-\begin{gather}
-\label{sf}
-\forall s \in S:\;
-\mi{sf}_s = \sum_{s' \in S'_s} (w_{s'} - b_{s',w}),\\
-\nonumber \text{where }S'_s = \left\{
-\begin{array}{ll} \set{s' \in S^\trt{f}}{P^\trt{f}_{s'} \geq P^\trt{f}_s}&\text{if }s \in S^\trt{f}\\
-									\set{s' \in S^\trt{a}}{P^\trt{a}_{s'} < P^\trt{a}_s}&\text{if }s \in S^\trt{a}\end{array}\right..
-\\
-\label{sfLim}\forall s \in S:\;
-\mi{SF}^-_s \leq \mi{sf}_s \leq \mi{SF}^+_s\\
-%
-\label{bm}\forall s \in S:\;
-\mi{bm}_s = 	\sum_{s' \in S'_s} (w_{s'} + b_{s',w})\cdot |P^\trt{a}_s - \frac{P^\trt{f}_{s'}-P^\trt{a}_{s'}}{2}|\\
-%
-\label{bmLim}
-\mi{BM}^-_s \leq \mi{bm}_s \leq \mi{BM}^+_s. 
-\end{gather}
 
 \end{document}

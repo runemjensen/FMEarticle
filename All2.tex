@@ -1,5 +1,6 @@
 \input{preamble}
 \usepackage{longtable}
+\newcounter{counterName}
 \allowdisplaybreaks
 \begin{document}
 
@@ -9,22 +10,32 @@
 \maketitle
 
 \begin{abstract}
-Accurate capacity models that express the trade-off between different container types that can be stowed on vessels are required in core liner shipping functions such as uptake-, capacity-, and network management. 
-Today simple capacity models are used that cause overestimations and even though previous work on stowage planning optimization in principle provide fine-grained Vessel Stowage Models (VSMs), they are too complex to use in these functions. As an alternative, this article contributes a novel framework based on Fourier-Motzkin elimination that automatically derives Vessel Capacity Models (VCMs) from VSMs by projecting unneeded variables. Our results show that the projected VCMs are reduced by an order of magnitude both in number of inequalities and number of non-zero entries and can be solved up to 20-35 times faster than their corresponding VSMs. Our framework is applicable to LP models in general, and we show similar results for a multi-commodity flow problem.
+Accurate capacity models expressing the trade-off between different container types that can be stowed
+on vessels are required in core liner shipping functions such as uptake-, capacity-, and network management.
+Today, simple capacity models are used for these tasks, which causes overestimations. 
+Though previous work on stowage planning optimization in principle provide fine-grained Vessel Stowage Models (VSMs), they are too complex to be used in the mentioned functions. 
+As an alternative, this article contributes a novel framework based on Fourier-Motzkin
+elimination that automatically derives Vessel Capacity Models (VCMs) from VSMs by projecting unneeded
+variables. Our results show that the projected VCMs are reduced by an order of magnitude both in number of
+inequalities and number of non-zero entries and can be solved up to 20-35 times faster than their corresponding VSMs with only a negligible loss in accuracy. 
+Our framework is applicable to LP models in general, but are particularly effective on block-angular structured problems such as VSMs. We show similar results for a multi-commodity flow problem.
 \end{abstract}
 
 
 \section{Introduction}
-Container shipping is a central element in the clockwork of global trade\cite{EC13}. A container liner shipping company operates a set of container vessels which sail on closed loop services with fixed schedules. These services connect major trade regions like Asia and Europe, and the liner shipping business is focused on utilizing the cargo capacity in their service network. Unused capacity constitute a loss that can be fatal in a market with a profit margin of just a few percent.  
+Container shipping is a central element in the clockwork of global trade \cite{EC13}. A container liner shipping company operates a set of container vessels which sail on closed loop services with fixed schedules. These services connect major trade regions like Asia and Europe, and the liner shipping business is focused on utilizing the cargo capacity in their service network. Unused capacity constitute a loss that can be fatal in a market with a profit margin of just a few percent.  
 To maximize utilization of capacity, it is central for a liner shipping company to be able to estimate the residual capacity of a container vessel. This is challenging in practice. For an air plane, an empty seat usually means that the plane can fit an extra passenger. For a container vessel, on the other hand, an empty slot may be impossible to utilize for a wide range of reasons. For instance, if the slot can be loaded with a container within the weight and volume limits of its stack, the container may exhaust the lashing gear or cause the vessel to be unstable or exceed its stress limits. Moreover, it may block containers below it to be discharged in earlier ports, ruin the utilization of quay cranes, be in conflict with stowage rules or segregation rules for dangerous cargo, or obstruct the view of the captain. 
 
 The various stowage rules and seaworthiness requirements interact such that the free capacity of each container type and weight class is a complex function of the composition of cargo on board and the design of the vessel. Often it is only the stowage planning team that can determine the residual capacity of a vessel accurately, and even they may sometimes have to manually construct a stowage condition of the vessel to be able to do it. While stowage planners may be able to estimate free vessel capacity, the knowledge is primarily needed in higher order functions such as: {\em uptake management} that control the sale of cargo bookings to fill the vessels with profitable cargo; {\em capacity management} that route cargo through the service network; {\em network management} that makes changes to the service network; and {\em fleet management} that charters and buys vessels for the service network and reposition vessels between closing and opening services. Decision makers in these functions seldom have stowage insight or time to consult the stowage team. They usually boil down the free capacity of a vessel to its nominal volume, weight, and reefer (refrigerated containers) capacity minus total volume, weight and reefer number of containers already on board. This simple three dimensional capacity model is inherently optimistic, since it ignores stowage complications. It has been shown that it can lead to revenue over-estimates of more than 15\% \cite{AlbertosThesis}. This can cause sub-optimal decisions that significantly harm business.
 
-In this article, we present a method to calculate a Vessel Capacity Model (VCM) automatically from a linear Vessel Stowage Model (VSM) based on previous research on stowage optimization \cite{pacino11,AlbertosThesis}. The basic idea is to derive a capacity model by abstracting away the information about the slot position of containers in the corresponding stowage model so that it only expresses the free capacity of the container types and weight classes that can be stowed on the vessel. Inspired by previous work in constraint programming (e.g., \cite{lassez90}) and software verification (e.g., \cite{benoy05}), we do this by projecting container position variables out of the mentioned stowage models using a framework based on Fourier-Motzkin Elimination (FME). Similar to other recent FME frameworks (e.g., \cite{simon05,lukatskii08,shapot12}), our framework includes additional features such as using equalities for substitutions (Gauss-elimination), removing syntactically redundant constraints, a complete removal of redundant constraint after each variable elimination, and a method for coarsening the boundary of the projection. Our main computational contribution is a novel decomposition method that takes advantage of block-angular structured models to significantly speed-up the projection of variables in these models. Additionally, the complete redundancy is parallellized, and the framework includes preprocessing of the constraint system including removal of less strict inequalities.
+In this article, we present a method to calculate a Vessel Capacity Model (VCM) automatically from a linear Vessel Stowage Model (VSM) based on previous research on stowage optimization \cite{pacino11,AlbertosThesis}. 
+The basic idea is to derive the VCM by abstracting away the slot position of containers in the VSM so that the model only expresses the relationship between the residual capacity of each possible container type.
+Inspired by previous work in constraint programming (e.g., \cite{lassez90}) and software verification (e.g., \cite{benoy05}), we do this by projecting container position variables out of the mentioned stowage models using a framework based on Fourier-Motzkin Elimination (FME). Similar to other recent FME frameworks (e.g., \cite{simon05,lukatskii08,shapot12}), our framework includes additional features such as using equalities for substitutions (Gauss-elimination), removing syntactically redundant constraints, a complete removal of redundant constraint after each variable elimination, and a method for coarsening the boundary of the projection. Our main computational contribution is a novel decomposition method that takes advantage of block-angular structured models to significantly speed-up the projection of variables in these models. Additionally, the complete redundancy is parallellized, and the framework includes preprocessing of the constraint system including removal of less strict inequalities.
 
 Our experimental evaluation of computing VCMs with this method shows that FME generates a large number of redundant constraints in each projection iteration that can be removed. In theory, the number of non-redundant constraints can grow exponentially with the number of projected variables \cite{monniaux10}. However, the number of constraints and non-zeros in the resulting capacity models typically are reduced by an order of magnitude compared to their corresponding stowage models. Moreover, the decomposition method reduces the size of the intermediary models produced by FME, causing less time to be needed for removing redundant constraints, which again speeds up the projection process significantly. In addition, for the models that include hydrostatic constraints, the resulting VCMs can be solved 20-35 times faster than their VSMs with only a negligible loss in accuracy. Although it can take several hours to derive a capacity model due to the clean-up of redundant constraints, this only has to be done one time for a vessel class. In this way, the approach is suitable for computing capacity models that can be applied in higher order functions of liner shipping companies such as uptake-, capacity-, fleet-, and network management. Moreover, since they are linear and much faster to solve than their corresponding stowage models, they also can be integrated in decision support systems used to optimise these functions.
 
-Multi-commodity flow problems also have a block-angular structure, so our framework applies to these problems as well. We assume that the goal is to model how the amount of each commodity at the sinks depends on the amount of the commodities at the sources. For this purpose, the amount of each commodity that flows on edges is irrelevant and eliminated from the system. We found a speed-up of the projection process and a reduction in size of the resulting models similar to the ones seen for VCMs.
+Multi-commodity flow problems also have a block-angular structure, so our framework applies to these problems as well. We assume that the goal is to model how the amount of each commodity at the sinks depends on the amount of the commodities at the sources. For this purpose, the amount of each commodity that flows on edges is irrelevant and eliminated from the system. 
+For this projection, we found a speed-up and a reduction in size of the resulting models similar to the ones seen for VCMs.
 
 This article is organized as follows. Section~\ref{sec:background} provides a background on container vessels and stowage rules. Section~\ref{sec:stowmodel} presents the VSM that will later be projected to the wanted VCM. Section~\ref{sec:solutionMethod} outlines the methods used in our FME framework. Section~\ref{sec:results} presents experimental results. Finally, Section~\ref{sec:preWork} gives an overview of related work and Section~\ref{sec:concl} concludes.
 
@@ -33,12 +44,14 @@ This article is organized as follows. Section~\ref{sec:background} provides a ba
 \section{Background} \label{sec:background}
 
 The cargo space of a container vessel is divided into parts called \textit{bays} that each consists of a grid of \emph{cells}. Each cell is divided into two \emph{slots} and can accordingly hold one standard $40'$ container or two $20'$ containers. Some cells have power plugs allowing for \emph{reefer} containers to be refrigerated as required. Each bay is divided into three or four parts called \textit{locations}, at which level the vessel's capacities are given. See Figure~\ref{fig:vessel}.
+
 \begin{figure}[htbp]
 	\centering
 		\includegraphics{figures/vessel3.pdf}
 	\caption{Vessel structure and reference points seen (a) on a longitudinal intersection and (b) on a transversal intersection.}
 	\label{fig:vessel}
 \end{figure}
+
 To define common reference points for cargo-holding structures and hydrostatic constraints, we further define larger \emph{sections} of the vessel and their endpoints. Each of these sections either span a number of succeeding bays, or a part of the ship containing no bays at all.
 See Figure~\ref{fig:sectionEndPoints}. Note that this is \emph{not} part of the data describing the vessel itself, but an input we define.
 
@@ -59,7 +72,9 @@ On a vessel, stress forces arise as a result of gravitation acting downwards and
 The position of these reference points do not line up with bay endpoints, and this is remedied in the Vessel Stowage Model presented in the next section to allow for a less complex modelling. Further requirements to ensure the stability of the vessel are imposed in real life and considered e.g. in \cite{AlbertosThesis}, but are not included here.
 
 \section{Vessel Stowage Model (VSM)} \label{sec:stowmodel}
-This section presents the Vessel Stowage Model (VSM) that will be projected to obtain the wanted Vessel Capacity Model (VCM). The model is adapted from work by Delgado (\cite{AlbertosThesis}). It relies on vessel data from a real vessel profile used by an industrial loading computer. The VSM includes various stowage constraints and further describes the hydrostatic constraints reasonably accurate while abstracting away much of the unnecessary complexity relating to the physical layout of the vessel that is present in the data. More specifically, the buoyancy data used in hydrostatic calculations are given at a set of points along the vessel (stations), while hydrostatic constraints are given in relation to another set of points (frames), and neither of these coincide with the position of the structures holding the cargo or the ballast tanks (see Figure~\ref{fig:vessel}(a)). The measure points are aligned in the VSM (see Figure~\ref{fig:sectionEndPoints}), and calculations for the hydrostatic constraints are simplified. The sets, variables and parameters used in VSM are listed below.
+This section presents the Vessel Stowage Model (VSM) that will be projected to obtain the wanted Vessel Capacity Model (VCM). The model is adapted from work by Delgado (\cite{AlbertosThesis}). It relies on vessel data from a real vessel profile used by an industrial loading computer. The VSM includes various stowage constraints and further describes the hydrostatic constraints reasonably accurate while abstracting away much of the unnecessary complexity relating to the physical layout of the vessel that is present in the data. More specifically, the buoyancy data used in hydrostatic calculations are given at a set of points along the vessel (stations), while hydrostatic constraints are given in relation to another set of points (frames), and neither of these coincide with the position of the structures holding the cargo or the ballast tanks (see Figure~\ref{fig:vessel}(a)). The measure points are aligned in the VSM (see Figure~\ref{fig:sectionEndPoints}), and calculations for the hydrostatic constraints are simplified. 
+
+The sets, variables and parameters used in VSM are listed below. Buoyancy data and hydrostatic limits are translated to the sections' end points, and the derived parameters are included.
 
 \vspace{3mm}
 \begin{centering}
@@ -78,7 +93,7 @@ $B$ 																	& Blocks with constant weight. 			& $\mi{ST}$ 													
 {p{3.7cm}p{11.5cm}}
 \multicolumn{2}{l}{\textbf{Decision variables}}\\
 \hline\noalign{\smallskip}
-$x_{l,\tau}\in \mathbb{R}^+_0$		& {Number of containers of type $\tau\in T$ to be stowed in each location $l\in L$}.\\
+$x_{l,\tau}\in \mathbb{R}^+_0$		& {Number of containers of type $\tau\in T$ to be stowed in location $l\in L$}.\\
 $t_s\in \mathbb{R}^+_0$						& {The weight of ballast tanks within section $s\in S$.}\\
 \\
 \multicolumn{2}{l}{\textbf{Auxilliary variables}}\\
@@ -92,10 +107,10 @@ $\mi{bm}_s\in \mathbb{R}$ 				& {The bending moment at the aft endpoint of secti
 \\
 \multicolumn{2}{l}{\textbf{Parameters}}\\
 \hline\noalign{\smallskip}
-$C_l^{\{\trt{20}, \trt{40}, \trt{TEU}\}}\in \mathbb{N}$ 		& {The capacity in TEU for location $l\in L$ w.r.t. $20'$ containers/$40'$ container/TEUs in total.} \\
-$C_l^{\{\trt{RS}, \trt{RC}\}}\in \mathbb{N}$								& {The number of reefer slots/reefer cells in location $l\in L$.}\\
-$C_l^{\{\trt{W20}, \trt{W40}\}}\in \mathbb{N}$							& {The weight capacity of  $20'$/$40'$ containers in location $l\in L$.}\\
-$W^\tau, W_b\in \mathbb{R}^+_0$															& {The weight of container type $\tau\in T$, and of block $b\in B$, respectively.} \\
+$C_l^{\{\trt{20}, \trt{40}, \trt{TEU}\}}\in \mathbb{N}$ 		& {The capacity in TEU for location $l\in L$ w.r.t. $20'$ containers/$40'$ container/TEUs in total, respectively.} \\
+$C_l^{\{\trt{RS}, \trt{RC}\}}\in \mathbb{N}$								& {The number of reefer slots/reefer cells in location $l\in L$, respectively.}\\
+$C_l^{\{\trt{W20}, \trt{W40}\}}\in \mathbb{N}$							& {The weight capacity of  $20'$/$40'$ containers in location $l\in L$, respectively.}\\
+$W_\tau, W_b\in \mathbb{R}^+_0$															& {The weight of container type $\tau\in T$, and of block $b\in B$, respectively.} \\
 $A_{\sigma, d}\in \mathbb{R}^+_0$ 													&	{The area submerged in water at station $\sigma\in ST$ for a displacement $d\in D$.}\\
 $P^{\{\trt{f},\trt{a}\}}_{l}$, $P^{\{\trt{f},\trt{a}\}}_{b}$, $P^{\{\trt{f},\trt{a}\}}_{t}\in \mathbb{R}$, 
 																														&	{The longitudinal position of the fore/aft endpoint of location $l\in L$, block $b \in B$, and tank $t \in BT$, 
@@ -113,7 +128,7 @@ $\mi{Max}^\trt{WT}_s\in \mathbb{R}$													& {Upper bound for the weight of
 $A''_{p, d}\in \mathbb{R}^+_0$															&	{Approximation of the area submerged in water at a longitudinal position $p$ along the vessel for a displacement $d\in \mathbb{R}$.}\\
 $\mi{PR}_{b,s}\in[0;1]$																			& {The percentage of the tank $b\in\mi{BT}$ that lies within section $s\in S$.}
 \end{longtable}
-Buoyancy data and hydrostatic limits are translated to the sections' end points, and the derived parameters are included. A container type $\tau \in T$ defines the container's length (20' or 40'), weight class (6, 21, or 27 tons), and whether it is a reefer or not. The set of stations, $ST$, includes $\sigma^\trt{a}$ and $\sigma^\trt{f}$, which are two (artificial) stations at the aft most and fore most positions of the ship, respectively. Similarly, $F$ contains the frames $f^\trt{a}$ and $f^\trt{f}$. The submerged areas for these stations and bounds for these frames are trivial. It is assumed that if $L_s\neq \emptyset$ then $L_s$ contains all locations that are positioned within some interval on the longitudinal axis. 
+ A container type $\tau \in T$ defines the container's length (20' or 40'), weight class (6, 21, or 27 tons), and whether it is a reefer or not. The set of stations, $ST$, includes $\sigma^\trt{a}$ and $\sigma^\trt{f}$, which are two (artificial) stations at the aft most and fore most positions of the ship, respectively. Similarly, $F$ contains the frames $f^\trt{a}$ and $f^\trt{f}$. The submerged areas for these stations and bounds for these frames are trivial. It is assumed that if $L_s\neq \emptyset$ then $L_s$ contains all locations that are positioned within some interval on the longitudinal axis. 
 
 The decision variables of the VSM are $x_{l,\tau}$ for all $l\in L$ and $\tau \in T$, denoting the number of containers of type $\tau$ stowed in location $l$, and $t_s$ for all $s\in S$, denoting the amount of ballast water in ballast tanks in section $s$. Even though $x_{l,\tau}$ is a number of containers and hence a natural number, we model it as a real number to ensure that the resulting model is a polyhedron. The auxiliary variables, $x_\tau$ for all $\tau\in T$ are the decision variables of the VCM. All other variables will be eliminated when we transform a VSM into its corresponding VCM. Hence, as required, a capacity model describes the free capacity trade-off between the different container types irrespective of where the containers are stowed on the vessel. The polyhedron representation of the VSM is defined by the following linear equations:
 \begin{align}
@@ -174,26 +189,26 @@ The decision variables of the VSM are $x_{l,\tau}$ for all $l\in L$ and $\tau \i
 			&&\\
 	%
 	\label{defBancy}
-	&b_{s,d} = \smashoperator[lr]{\sum_{p \in Q\setminus \{P^\trt{f}_s\}}} \frac{1}{2}\cdot(A''_{p,d}+A''_{\mi{next}_p,d})\cdot (\mi{next}_p-p), 
-			&& \forall s\in S, d\in \mathbb{R}\\%\text{where } \mi{next}_p = \min\set{p' \in P}{p' > p}.\\
+	&b_{s,d} = \smashoperator[lr]{\sum_{p \in Q\setminus \{P^\trt{f}_s\}}} 0.5\cdot(A''_{p,d}+A''_{\mi{next}_p,d})\cdot (\mi{next}_p-p), 
+			&& \forall s\in S, d\in \mathbb{R}.\\%\text{where } \mi{next}_p = \min\set{p' \in P}{p' > p}.\\
 	%
 	\label{sfF}
-	&\mi{sf}_s = \smashoperator[lr]{\sum_{s' \in S. P^\texttt{f}_{s'} \geq P^\texttt{f}_s}} (w_{s'} - b_{s',w}) 
-			&& \forall s \in S^\texttt{f}\\
+	&\mi{sf}_s = \smashoperator[r]{\sum_{s' \in S. P^\texttt{f}_{s'} \geq P^\texttt{f}_s}} (w_{s'} - b_{s',w}) 
+			&& \forall s \in S^\texttt{f}.\\
 	\label{sfA}
-	&\mi{sf}_s = \smashoperator[lr]{\sum_{s' \in S. P^\texttt{a}_{s'} < P^\texttt{a}_s}} (w_{s'} - b_{s',w}) 
-			&& \forall s \in S^\texttt{a}\\
+	&\mi{sf}_s = \smashoperator[r]{\sum_{s' \in S. P^\texttt{a}_{s'} < P^\texttt{a}_s}} (w_{s'} - b_{s',w}) 
+			&& \forall s \in S^\texttt{a}.\\
 	%
 	\label{sfLim}
 	&\mi{SF}^-_s \leq \mi{sf}_s \leq \mi{SF}^+_s
 			&& \forall s \in S.\\
 	%
 	\label{bmF}
-	&\mi{bm}_s = 	\smashoperator[lr]{\sum_{s' \in S. P^\texttt{f}_{s'} \geq P^\texttt{f}_s}} (w_{s'} + b_{s',w})\cdot |P^\trt{a}_s - \frac{P^\trt{f}_{s'}-P^\trt{a}_{s'}}{2}|
+	&\mi{bm}_s = 	\smashoperator[r]{\sum_{s' \in S. P^\texttt{f}_{s'} \geq P^\texttt{f}_s}} (w_{s'} + b_{s',w})\cdot |P^\trt{a}_s - \frac{P^\trt{f}_{s'}-P^\trt{a}_{s'}}{2}|
 			&& \forall s \in S^\texttt{f}.\\
 	%
 	\label{bmA}
-	&\mi{bm}_s = \smashoperator[lr]{\sum_{s' \in S. P^\texttt{a}_{s'} < P^\texttt{a}_s}} (w_{s'} + b_{s',w})\cdot |P^\trt{a}_s - \frac{P^\trt{f}_{s'}-P^\trt{a}_{s'}}{2}|
+	&\mi{bm}_s = \smashoperator[r]{\sum_{s' \in S. P^\texttt{a}_{s'} < P^\texttt{a}_s}} (w_{s'} + b_{s',w})\cdot |P^\trt{a}_s - \frac{P^\trt{f}_{s'}-P^\trt{a}_{s'}}{2}|
 			&& \forall s \in S^\texttt{a}.\\
 	%
 	\label{bmLim}
@@ -232,7 +247,7 @@ To obtain upper (lower) bounds for the shear force at the sections' aft endpoint
 \[
 \mi{SF}^+_s = \frac{\mi{SF}^+_{f_2}-\mi{SF}^+_{f_1}}{P_{f_2}-P_{f_1}}\cdot(P^\trt{a}_s - P_{f_1}) + \mi{SF}^+_{f_1}, 
 \]
-where $f_1 = \text{argmax}_{\set{f\in F}{P_f\leq P^\trt{a}_s}}P_f$ and $f_2 = \text{argmin}_{\set{f\in F}{P_f>P^\trt{a}_s}}P_f$. Of course, if there is an $f\in F$ such that $P^\trt{a}_s = P_f$ then we let $\mi{SF}^+_s = \mi{SF}^+_f$. Similarly we find $\mi{SF}^-_s$, as well as $\mi{BM}^+_s$ and $\mi{BM}^\trt{-}_s$. Given a displacement $d\in\mathbb{R}^+_0$, the shear forces and bending moment at each section $s$'s aft endpoint can then be calculated. If $s\in S^\trt{f}$ ($s\in S^\trt{a}$), then the shear force at the aft endpoint equals the total weight $w_s$ of the sections fore (aft) $P^\trt{a}_s$ minus the buoyancy of the sections fore (aft) $P^\trt{a}_s$. Similarly, the bending moment at section $s$'s aft endpoint is calculated as the sum of resulting forces of sections $s'$ lying fore (aft) $P^\trt{a}_s$ times the distance from $P^\trt{a}_s$ to $s'$'s (longitudinal) midpoint. Equations \eqref{sfF} - \eqref{bmLim} define these shear forces and bending moments and their limits.
+where $f_1 = \text{argmax}_{\set{f\in F}{P_f\leq P^\trt{a}_s}}P_f$ and $f_2 = \text{argmin}_{\set{f\in F}{P_f>P^\trt{a}_s}}P_f$. Of course, if there is an $f\in F$ such that $P^\trt{a}_s = P_f$ then we let $\mi{SF}^+_s = \mi{SF}^+_f$. Similarly we find $\mi{SF}^-_s$, as well as $\mi{BM}^+_s$ and $\mi{BM}^\trt{-}_s$. Given a displacement $d\in\mathbb{R}^+_0$, the shear forces and bending moment at each section $s$'s aft endpoint can then be calculated. If $s\in S^\trt{f}$ ($s\in S^\trt{a}$), then the shear force at the aft endpoint equals the total weight $w_s$ of the sections fore (aft) $P^\trt{a}_s$ minus the buoyancy of the sections fore (aft) $P^\trt{a}_s$. Similarly, the bending moment at section $s$'s aft endpoint is calculated as the sum of resulting forces of sections $s'$ lying fore (aft) $P^\trt{a}_s$ times the distance from $P^\trt{a}_s$ to $s'$'s (longitudinal) midpoint. Equations \eqref{sfF} - \eqref{bmLim} define these shear forces and bending moments and require them to be within the found limits.
 
 \section{Solution Method} \label{sec:solutionMethod}
 
@@ -241,15 +256,17 @@ This section introduces our FME-based projection framework. It can be used for m
 In the following, a constraint system $S$ is a set of equalities and inequalities over the same set of variables, $\VAR(S)=\{x_1,\ldots, x_n\}$. Each constraint $c$ is either an equality, written $a_1x_1 + \ldots +a_nx_n = b$, or an inequality, written $a'_1x_1 + \ldots +a'_nx_n\leq b'$ (or alternatively using dot-product notation). We let $\var(c)$ denote the variables whose coefficient in $c$ is nonzero and say that $c$ \emph{uses} $x$ if $x\in \var(c)$. The set of points in $\mathbb{R}^{|\VAR(S)|}$ that satisfies all constraints in $S$ is called $S$'s \emph{feasible area}. A constraint $c\in S$ is \emph{redundant} if it does not influence the feasible area for $S$. In other words the inequality $c: \ve{a}\cdot\ve{x}\leq b$ is redundant iff $\max \ve{a}\cdot\ve{x}$ w.r.t. $S\setminus\{c\}$ is less or equal to $b$. An equality is redundant iff both corresponding inequalities are redundant. If the constraint $c$ is \emph{not} redundant, it is called \emph{non-redundant} or binding.
 
 As described above, the feasible area of $S$ is the combination of values for the variables in $\VAR(S)$ that satisfy all constraints in $S$. We assume, however, that there are some variables $Y\subseteq \VAR(S)$ whose value in a feasible point we are not interested in; we just want to know that a satisfying value exists. This information is captured by the \emph{projection} of the feasible area of $S$ w.r.t. $Y$, $\mi{proj}_YS\in\mathbb{R}^{|\VAR(S)\setminus Y|}$. This is the largest set consisting of values for $\VAR(S)\setminus Y$ that can be extended with values for $Y$ such that all constraints in $S$ are satisfied (see Figure~\ref{fig:proj}). 
-\begin{figure}
+
+\begin{figure}[htbp]
 	\centering
-		\includegraphics[scale=0.8]{figures/projection2.pdf}
+		\includegraphics{figures/projection2.pdf}
 	\caption{The projection of the system $S$ with respect to $\{x_3\}$.}
 	\label{fig:proj}
 \end{figure}
+
 The projection of a system $S$ is a set of points in Euclidean space, and it is the feasible region of (another) system $S'$ (see e.g. \cite{ziegler95}). However, many constraint systems determine the same feasible area, and when we say e.g. ``$S'$ is the projection of $S$ w.r.t. $Y$'' we mean that ``$S'$ is one of the constraint systems whose feasible area equals the projection of the feasible area of $S$ w.r.t $Y$''.
 
-In this article, we are mainly interested in the original system $S$ and its projection $S'$, while the associated feasible areas of $S$ and $S'$ are the ``mediator'' between the two systems. However, since the feasible area of a system is just a set of points in a multi-dimensional Euclidean space, the number and the order of the variables are important. To simplify the presentation, though, we do not specify $VAR(S')$ formally for every considered constraint system $S$. Intuitively, we just make sure that the dimensions (and order of variables) ``match''. For example, when two systems $T$ and $T'$ are joined to form another system $T''$, we consider $T$ and $T'$ as constraints over the same variable set, $VAR(T'')=var(T)\cup var(T')$. A more stringent exposition keeping track of the variable sets and ordering can be found in \cite{MyTechRep}.
+In this article, we are mainly interested in the original system $S$ and its projection $S'$, while the associated feasible areas of $S$ and $S'$ are the ``mediator'' between the two systems. However, since the feasible area of a system is just a set of points in a multi-dimensional Euclidean space, the number and the order of the variables are important. To simplify the presentation, though, we do not specify $\VAR(S')$ formally for every considered constraint system $S$. Intuitively, we just make sure that the dimensions (and order of variables) ``match''. For example, when two systems $T$ and $T'$ are joined to form another system $T''$, we consider $T$ and $T'$ as constraints over the same variable set, $\VAR(T'')=\var(T)\cup \var(T')$. A more stringent exposition keeping track of the variable sets and ordering can be found in \cite{MyTechRep}.
 
 \subsection{Projection procedure} \label{sec:methods}
 Our projection framework is based on Fourier-Motzkin elimination for calculating the projection of the constraint system $S$ w.r.t. $Y$. It consists of several sub-procedures. The methods for projecting any (not necessarily structured) constraint system are described further below in this section, while the decomposition used on block-angular structured problems will be described in the next section.
@@ -282,7 +299,7 @@ i_{p,n,x}: -a'_x\cdot \ve{a}\cdot\ve{x} + a_x\cdot \ve{a}'\cdot\ve{x} \leq -a'_x
 By construction, the coefficient for $x$ in $i_{p,n,x}$ is zero, and the resulting system $S' = \mi{Zero}_S(x) \cup\\
 \set{i_{p,n,x}}{(p,n)\in \Pos_S(x)\times Neg_S(x)}$ is the projection of $S$ w.r.t. $\{x\}$.  
 
-The order in which variables are eliminated naturally influences the size of the intermediary inequality systems. We have chosen to use the greedy heuristic {that minimizes the number of new inequalities in the immediately next system \cite{duffin74}}, which is the most commonly used heuristic. It is easily calculated from the current system as the variable $x\in Y$ that minimizes $|\Pos_S(x)||\Neg_S(x)| - |\Pos_S(x)|-|\Neg_S(x)|$.  In the worst case scenario, where $|\Pos_S(x)| = |\Neg_S(x)| = \frac{|S|}{2}$ for all $x\in Y$, the number of inequalities in the created system $S'$ is $\frac{1}{4}|S|^2$, which implies that (both time and space) complexity is double-exponential. For a large, dense system, the growth will be substantial, which prohibits it from use for practical purposes \emph{if} the added inequalities are non-redundant or the non-redundant inequalities are not removed ({see e.g. \cite{lassez93} and \cite{lukatskii08}}). It should, however, also be emphasized that not all inequalities in the succeeding system are necessarily non-redundant; in fact, the number of non-redundant inequalities will at most grow exponentially \cite{monniaux10}.
+The order in which variables are eliminated naturally influences the size of the intermediary inequality systems. We have chosen to use the greedy heuristic {that minimizes the number of new inequalities in the immediately next system \cite{duffin74}}, which is a commonly used heuristic. It is easily calculated from the current system as the variable $x\in Y$ that minimizes $|\Pos_S(x)||\Neg_S(x)| - |\Pos_S(x)|-|\Neg_S(x)|$.  In the worst case scenario, where $|\Pos_S(x)| = |\Neg_S(x)| = \frac{|S|}{2}$ for all $x\in Y$, the number of inequalities in the created system $S'$ is $\frac{1}{4}|S|^2$, which implies that (both time and space) complexity is double-exponential. For a large, dense system, the growth will be substantial, which prohibits it from use for practical purposes \emph{if} the added inequalities are non-redundant or the non-redundant inequalities are not removed ({see e.g. \cite{lassez93} and \cite{lukatskii08}}). It should, however, also be emphasized that not all inequalities in the succeeding system are necessarily non-redundant; in fact, the number of non-redundant inequalities will at most grow exponentially \cite{monniaux10}.
 
 \subsubsection{Gauss-elimination} 
 Equalities in a constraint system can be treated as two inequalities when doing FME as described above. However, an equality $e$ can also be used to isolate a variable $x\in Y$ which can then be substituted in all other constraints in $S$. We refer to this as Gauss-elimination of the variable $x$ using $e$. This also eliminates $x$ from the system and does not cause the same combinatorial explosion of inequalities as FME may do (e.g., \cite{duffin74,simon05}). Before performing FME we therefore do as many Gauss-elimination of variables in $Y$ as possible. To avoid density, when the system $S$ contains several equalities, we first choose the variable $x$ (used in any equality) that is used the fewest times in total in $S$. We then choose the equation $e$ among those using $x$ that uses the fewest variables, and do Gauss-elimination of $x$ using $e$.  This is then repeated until there are no more equalities using variables from $Y$.
@@ -327,16 +344,16 @@ If $\mi{lb}_c \geq b$, then necessarily $\mi{lb}_c = b$, and $c$ is removed from
 	then $ub_x$ is updated to $\min\{ub_x, \frac{b-\mathit{lb}_{c,x}}{a_x}\}$. 
 	Similarly, if $a_x < 0$ and $\mi{lb}_{c,x}<+\infty$, then $lb_x$ is updated to $\max\{lb_x, \frac{b-\mathit{lb}_{c,x}}{a_x}\}$.	
 	Updating bounds for constraints with only one variable (step 3) is a special case of this.
-%\setcounter{counterName}{\value{enumi}}
+\setcounter{counterName}{\value{enumi}}
 \end{enumerate}	
 %
 Comparing two inequalities syntactically, we can in some cases detect redundancy as described below. All pairs of inequalites are then compared in an efficient manner.
 In the following, let $c$ be an constraint in $S$ with left-hand-side $\ve{a}\cdot \ve{x}$ and right-hand-side $b$, and let $c'$ be another constraint with left-hand-side $\ve{a}'\cdot \ve{x}$ and right-hand-side $b'$. 
 \begin{enumerate} \itemsep0em
-%\setcounter{enumi}{\value{counterName}}
+\setcounter{enumi}{\value{counterName}}
 \item 
 If $\ve{a}=\sigma\cdot \ve{a}'$, then $c$ is \emph{linearly dependent} (\cite{lassez93}). $c$ is hence redundant if
-it is an \underline{in}equality and $\sigma\cdot b'\leq b$ and either: $\sigma\geq 0$; or $\sigma<0$ and and $c'$ is an equality. $c$ is also redundant if both $c$ and $c'$ are equalities and $\sigma\cdot b'\leq b$. 
+it is an \underline{in}equality and $\sigma\cdot b'\leq b$ and either: $\sigma\geq 0$; or $\sigma<0$ and $c'$ is an equality. $c$ is also redundant if both $c$ and $c'$ are equalities and $\sigma\cdot b'\leq b$. 
 It is enough to check if this holds for $\sigma = \frac{c_x}{c'_x}$ for the first variable $x$ used by $c'$.
 \item
 If all variables used in $c$ and $c'$ are non-negative, and there exists a $\sigma\geq 0$ such that $a_x \leq \sigma \cdot a'_x$ for all $x$, while $\sigma\cdot b' \leq b$, then $c$ is \emph{less strict} than $c'$; it is redundant and hence removed. If $c$ is an equality, so must $c'$ be, and hence $c'$ is turned into an equality. 
@@ -409,7 +426,7 @@ Any variable in $X_1\cap Y$ has a zero-coefficient in all constraints not in $S^
 \begin{prop}
 {The projection of $S$ w.r.t. $Y$ defines the same feasible area as 
 the projection of $\mathcal{S}$ w.r.t. $Z^0 \cup Y\setminus (X_1\cup \ldots \cup X_k)$, where
-$\mathcal{S}$ is as defined in \ref{eq:curlyS}.% = S^0_\trt{g} \cup S'^0_1\cup \ldots \cup S'^0_k$ and $S'^0_i$ is the projection of $S^0_i$ w.r.t. $Y\cap X_i$ for all $i\in\{1,\ldots, k\}$.
+$\mathcal{S}$ is as defined in \eqref{eq:curlyS}.% = S^0_\trt{g} \cup S'^0_1\cup \ldots \cup S'^0_k$ and $S'^0_i$ is the projection of $S^0_i$ w.r.t. $Y\cap X_i$ for all $i\in\{1,\ldots, k\}$.
 }
 \end{prop}
 
@@ -422,12 +439,14 @@ To do so, we collect all subsystems into $k_1$ small groups; we have mostly used
 Subsequently we can then join the projected $S^1$-systems with the (rephrased) transverse inequalities, $S_\trt{g}^1$, and finally project the last auxiliary variables. Alternatively, we can repeat the steps above until the final projection can be done. 
 
 Each time we further decompose a system, we use a partitioning of the subsystems $S^l_1, \ldots, S^l_{k_l}$ to create a new level of $k_{l+1}$ subsystems, $S^{l+1}_1,\ldots, S^{l+1}_{k_{l+1}}$. This effectively creates a tree structure of smaller inequality systems, where each node is associated with a subsystem and a set of variables that should be eliminated from the system. Using this tree, an inequality system associated with a node is projected by recursively projecting the systems associated with the children of the node. Further, as expected, projecting the root of the tree constructed from $S$ and $Y$ creates a system equivalent to the projection of $S$ w.r.t. $Y$. See Figure~\ref{fig:decomp2} and the example further below.
-\begin{figure}
+
+\begin{figure}[htbp]
 	\centering
 		\includegraphics{figures/Example3.pdf}
 	\caption{(a) A system $S$ decomposed into a tree structure of subsystems. (b) Recursive projection of the tree-structure in (a).}
 	\label{fig:decomp2}
 \end{figure}
+
 The intuition why this works is as before; projecting all $Y$ and $Z$-variables from the union of all the (unprojected) subsystems in the nodes of the tree corresponds to projecting the $Y$ variables from $S$, and because we can choose the elimination order of the variables, we only need to project the subsystems in the tree in the correct order (a rigorous proof can be found in \cite{MyTechRep}).
 
 \begin{prop}
@@ -509,7 +528,7 @@ Then, when at some point there are less nodes left to project than there are wor
 \section{Results}\label{sec:results}
 We have constructed a number of different VSMs from data for a specific vessel, where the weight and hydrostatics are taken into account to various degrees. The first VSM does not consider the weight of the containers at all (i.e. the described constraints limiting the total displacement as well as all hydrostatic constraints have been removed), the second VSM does not model any hydrostatic constraints, and the subsequent VSMs consider the hydrostatic constraints at 2, 4, 6 and 8 measure points, respectively.
 
-Each VSM has been transformed into its corresponding VCM. That is, all variables but $\set{x_\tau}{\tau\in T}$ are eliminated. Projections have been done in two different ways, decomposed and flat. For the decomposed projections, a tree structure has been used as described in previous section, while the flat projections do not use any decomposition at all. 
+Each VSM has been transformed into its corresponding VCM. That is, all variables but $\set{x_\tau}{\tau\in T}$ have been eliminated. Projections have been done in two different ways, decomposed and flat. For the decomposed projections, a tree structure has been used as described in the previous section, while the flat projections do not use any decomposition at all. 
 Our FME-based projection framework has been implemented in Java. The experiments were carried out on a computer with an {Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} E5-1660 V4 processor with a frequency of 3.20-3.80 GHz, 32GB RAM, and with 8 cores and 16 threads.}
 
 The VSMs and VCMs have been optimized for revenue. The optimal objective value as well as time taken has been compared. The latter is measured in both iterations and \emph{ticks} as it appears when solved with CPLEX Interactive Optimizer version 12.5.0.0. Ticks is a deterministic time measure that according to the software provider ``yields the same level of performance for repeated solving of the same model with the same parameter settings, on the same computing platform''. The revenue is dependent on the container type, so that the container types that (in the industry) are found more limiting also yields a higher revenue, see further below. 
@@ -624,16 +643,24 @@ As can be seen from the numbers in Table~\ref{tab:usingProjections}, in general,
 When comparing to the simple model, we see that this model of course is even faster (between 41-97 times (iterations) and 132-294 (ticks)), but the difference in objective is also between 72\% and 76\% for the last 5 models. Hence, our results confirm the experiments by Delgado \cite{AlbertosThesis} showing a substantial revenue overestimation when using the simple model. 
 
 \subsection{Projection of multi-commodity flow problems}
-Beside the VSM, we have studied another block-angular structured system, namely one describing a multi-commodity flow problem. In a multi-commodity flow graph $G=(V,E)$ with $k$ commodities, we have a positive variable $x_{e,i}$ for each edge $e\in E$ and commodity $1\leq i\leq k$, which denotes the number of goods of commodity $i$ that flows on the edge $e$. There is an upper bound on each $x_{e,i}$ as well as a common upper bound for the sum of commodities on an edge. Further, there are constraints to ensure that for all commodities $i$ and all nodes $n$ -- except for source nodes $S\subseteq V$ and sink nodes $T\subseteq V$ -- that the sum of goods of commodity $i$ on edges going to $n$ equals the sum of good of commodity $i$ on edges going away from $n$. Considering the case, where demands and supply are not given, we want to know how the amount of each commodity at the sinks depends on the amount of each commodity at the sources. Therefore we eliminate all variables $x_{e,i}$, where $e\notin S\cup T$, from the constraint system describing the flow problem. A multi-commodity flow problem is naturally block-structured, though, there are usually many global constraints -- corresponding to the common upper limits for each edge. Instead of using these blocks to decompose the system, it is also possible to divide the graph into smaller subgraphs. We then treat the ingoing edges in a subgraph $G'$ as sources ($S_{G'}$) and the outgoing edges as sinks ($T_{G'}$), and eliminate all variables but $\{\;x_{e,i}\;|\; e\in \bigcup_{n\in S_{G'}}out(n)\cup \bigcup_{n\in T_{G'}}in(n), 1\leq i\leq k\;\}$ from the inequality systems describing the flow problem in $G'$. Afterwards, these subgraphs are successively combined into larger graphs $\tilde{G}$ from which all but $\{\;x_{e,i}\;|\; e\in \bigcup_{n\in S_{\tilde G}}out(n)\cup \bigcup_{n\in T_{\tilde G}}in(n), 1\leq i\leq k\;\}$ are eliminated. 
+Beside the VSM, we have studied another block-angular structured system, namely one describing a multi-commodity flow problem. In a multi-commodity flow graph $G=(V,E)$ with $k$ commodities, we have a positive variable $x_{e,i}$ for each edge $e\in E$ and commodity $1\leq i\leq k$, which denotes the number of goods of commodity $i$ that flows on the edge $e$. There is an upper bound on each $x_{e,i}$ as well as a common upper bound for the sum of commodities on an edge. 
+Supply and demand are modeled with variables $x_e,i$ for (artificial) edges going to source nodes (from nowhere), $\mi{ES}_G$, and edges going from sinks (to nowhere), $\mi{ET}_G$, respectively. 
+Constraints ensure that for all commodities $i$ and all nodes $n$ %-- except for source nodes $S\subseteq V$ and sink nodes $T\subseteq V$ -- that
+the sum of goods of commodity $i$ on edges going to $n$ equals the sum of good of commodity $i$ on edges going away from $n$. Considering the case, where demands and supply are not given, we want to know how the amount of each commodity at the sinks depends on the amount of each commodity at the sources. Therefore we eliminate all variables $x_{e,i}$, where $e\notin \mi{ES}_G\cup \mi{ET}_G$, from the constraint system describing the flow problem. 
+
+A multi-commodity flow problem is naturally block-structured, though, there are usually many global constraints -- corresponding to the common upper limits for each edge. Instead of using these blocks to decompose the system, it is also possible to divide the graph into smaller subgraphs. We then treat the ingoing edges in a subgraph $G'$ as supply edges ($\mi{ES}_{G'}$) and the outgoing edges as demand edges ($\mi{ET}_{G'}$), and eliminate all variables but $\{\;x_{e,i}\;|\; e\in \mi{ES}_{G'}\cup \mi{ET}_{G'}, 1\leq i\leq k\;\}$ from the inequality systems describing the flow problem in $G'$. Afterwards, these subgraphs are successively combined into larger graphs $\tilde{G}$ from which all but $\{\;x_{e,i}\;|\; e\in \mi{ES}_{\tilde{G}} \cup \mi{ET}_{\tilde{G}}, 1\leq i\leq k\;\}$ are eliminated. 
 
 For testing our framework on a flow graph, we have generated one inspired by the problems in the collection Chen.DSP by Jones, Lustig and Farwolden \cite{JLFP93}. The constructed graph is illustrated in Figure~\ref{fig:multiflow}. 
+
 \begin{figure}[htbp]
 	\centering
 		\includegraphics{figures/multiflow.pdf}
-	\caption{A ``layered'' multi-commodity flow graph.}
+	\caption{A ``layered'' flow graph. The graph only shows the edges for one commodity.}
 	\label{fig:multiflow}
 \end{figure}
+
 It consists of seven layers with three nodes each, and there are two commodities. From each node at a given level, there is a directed edge to each node at the next level. Sources are composed of the nodes at the first level, while the nodes at the last level constitutes the sinks. The capacity for each commodity $c_i$ and edge $e$ is 0 with a probability of 5\% and otherwise drawn from a uniform distribution between 5 and 15, while the common capacity of the edge e is 0 with probability 25\% and otherwise a number drawn from the uniform distribution between $s$-10 and $s$, where $s$ is the sum of the individual capacities on that edge. Similarly to Table~\ref{tab:projections}, Table~\ref{tab:multicom} shows the size of the original model (both as modelled and presolved) and the projections resulting from a flat and decomposed projection, respectively. Both projections finished and the time taken to make them is also shown. Figure~\ref{fig:multicom} shows the progression over time of the number of inequalities and number of variables left to be projected, for both the flat and decomposed projection algorithm.
+
 \begin{table}[htbp]
 \centering
 \begin{tabular}{l|r@{ / }r@{ / }r@{ / }r|r}
@@ -650,7 +677,8 @@ Projected, flat& 17 (2)& 12& 53&3.12& 17h 41m\\
 \caption{Size of projection of a multi-commodity flow model.}
 \label{tab:multicom}
 \end{table}
-Also here, we see a reduction in the number of inequalities, variables and non-zero entries, of 3.5, 6.6, and 3.3/3.8 times, respectively (in both cases) compared to the presolved model. The density stays almost the same; for the decomposed model, the density increases with 5.3 \%, while the density decreases with 8.5\% for the flat projection.
+
+Also here we see a reduction in the number of inequalities, variables and non-zero entries, of 3.5, 6.6, and 3.3/3.8 times, respectively (in both cases) compared to the presolved model. The density stays almost the same; for the decomposed model, the density increases with 5.3 \%, while the density decreases with 8.5\% for the flat projection.
 This is not as big a reduction as for the VSMs, however, the unprojected models are also smaller to begin with. 
 \begin{figure}
 	\centering
